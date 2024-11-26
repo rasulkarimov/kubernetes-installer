@@ -1,0 +1,23 @@
+---
+- name: Configure Kubernetes Load Balancer
+  hosts: loadbalancer
+  become: true
+  vars:
+    api_servers:
+      - { name: "master01", ip: "10.0.1.11" }
+      - { name: "master02", ip: "10.0.1.12" }
+      - { name: "master03", ip: "10.0.1.13" }
+    config_servers:
+      - { name: "master01", ip: "10.0.1.11" }
+      - { name: "master02", ip: "10.0.1.12" }
+      - { name: "master03", ip: "10.0.1.13" }
+    http_workers:
+      - { name: "worker01-http-router0", ip: "10.0.1.21" }
+      - { name: "worker02-http-router1", ip: "10.0.1.22" }
+      - { name: "worker03-http-router2", ip: "10.0.1.23" }
+    https_workers:
+      - { name: "worker01-https-router0", ip: "10.0.1.21" }
+      - { name: "worker02-https-router1", ip: "10.0.1.22" }
+      - { name: "worker03-https-router2", ip: "10.0.1.23" }
+  roles:
+    - haproxy

@@ -1,0 +1,26 @@
+---
+- ansible.posix.sysctl:
+    name: net.ipv4.ip_forward
+    value: '1'
+    state: present
+    
+# - name: Update apt package index
+#   ansible.builtin.apt:
+#     update_cache: yes
+
+- name: Install HAProxy
+  ansible.builtin.apt:
+    name: 
+      - haproxy
+    state: present
+    update_cache: yes
+
+- name: Configure HAProxy
+  template:
+    src: haproxy.cfg.j2
+    dest: /etc/haproxy/haproxy.cfg
+
+- name: Restart HAProxy
+  service:
+    name: haproxy
+    state: restarted

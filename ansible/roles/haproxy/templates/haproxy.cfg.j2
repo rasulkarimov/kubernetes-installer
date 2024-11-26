@@ -1,0 +1,82 @@
+#
+# Ansible managed
+#
+global
+    log         127.0.0.1 local2
+    chroot      /var/lib/haproxy
+    pidfile     /var/run/haproxy.pid
+    maxconn     10000
+    user        haproxy
+    group       haproxy
+    daemon
+    stats socket /var/lib/haproxy/stats
+
+defaults
+    mode                    tcp
+    log                     global
+    option                  httplog
+    option                  dontlognull
+    option http-server-close
+    option forwardfor       except 127.0.0.0/8
+    option                  redispatch
+    retries                 3
+    timeout http-request    10s
+    timeout queue           1m
+    timeout connect         10s
+    timeout client          4h
+    timeout server          4h
+    timeout http-keep-alive 10s
+    timeout check           10s
+    maxconn                 10000
+
+listen stats
+    bind :9000
+    mode http
+    stats auth admin:admin
+    stats enable
+    stats uri /
+    monitor-uri /healthz
+
+frontend kubernetes-api-server
+    bind *:6443
+    default_backend kubernetes-api-server
+    option tcplog
+
+backend kubernetes-api-server
+    balance source
+    {% for host in groups['masters'] %}
+    server {{ host }} {{ hostvars[host].ansible_host }}:6443 check
+    {% endfor %}
+
+frontend machine-config-server
+    bind *:22623
+    default_backend machine-config-server
+    option tcplog
+
+backend machine-config-server
+    balance source
+    {% for host in groups['masters'] %}
+    server {{ host }} {{ hostvars[host].ansible_host }}:22623 check
+    {% endfor %}
+
+frontend ingress-http
+    bind *:80
+    default_backend ingress-http
+    option tcplog
+
+backend ingress-http
+    balance leastconn
+    {% for host in groups['workers'] %}
+    server {{ host }} {{ hostvars[host].ansible_host }}:80 check
+    {% endfor %}
+
+frontend ingress-https
+    bind *:443
+    default_backend ingress-https
+    option tcplog
+
+backend ingress-https
+    balance leastconn
+    {% for host in groups['workers'] %}
+    server {{ host }} {{ hostvars[host].ansible_host }}:443 check
+    {% endfor %}
