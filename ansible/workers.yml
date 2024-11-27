@@ -1,0 +1,7 @@
+- name: Configure Kubernetes Workers
+  hosts: workers
+  gather_facts: false
+  become: true
+  roles:
+    - common
+    - workers

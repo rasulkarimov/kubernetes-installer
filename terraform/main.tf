@@ -100,6 +100,16 @@ resource "aws_security_group_rule" "allow_api_server" {
   security_group_id = aws_security_group.kubernetes_security_group.id
 }
 
+# for the ingress-nginx admission controller
+resource "aws_security_group_rule" "allow_admission_controller" {
+  type              = "ingress"
+  from_port         = 8443
+  to_port           = 8443
+  protocol          = "tcp"
+  cidr_blocks       = ["0.0.0.0/0"]
+  security_group_id = aws_security_group.kubernetes_security_group.id
+}
+
 resource "aws_security_group_rule" "allow_https" {
   type              = "ingress"
   from_port         = 443
@@ -109,14 +119,41 @@ resource "aws_security_group_rule" "allow_https" {
   security_group_id = aws_security_group.kubernetes_security_group.id
 }
 
-# resource "aws_security_group_rule" "allow_http" {
-#   type              = "ingress"
-#   from_port         = 80
-#   to_port           = 80
-#   protocol          = "tcp"
-#   cidr_blocks       = ["0.0.0.0/0"]
-#   security_group_id = aws_security_group.kubernetes_security_group.id
-# }
+resource "aws_security_group_rule" "allow_http" {
+  type              = "ingress"
+  from_port         = 80
+  to_port           = 80
+  protocol          = "tcp"
+  cidr_blocks       = ["0.0.0.0/0"]
+  security_group_id = aws_security_group.kubernetes_security_group.id
+}
+
+resource "aws_security_group_rule" "allow_loadbalancer_https" {
+  type              = "ingress"
+  from_port         = 32462
+  to_port           = 32462
+  protocol          = "tcp"
+  cidr_blocks       = ["0.0.0.0/0"]
+  security_group_id = aws_security_group.kubernetes_security_group.id
+}
+
+resource "aws_security_group_rule" "allow_loadbalancer_http" {
+  type              = "ingress"
+  from_port         = 31112
+  to_port           = 31112
+  protocol          = "tcp"
+  cidr_blocks       = ["0.0.0.0/0"]
+  security_group_id = aws_security_group.kubernetes_security_group.id
+}
+
+resource "aws_security_group_rule" "allow_http_8080" {
+  type              = "ingress"
+  from_port         = 8080
+  to_port           = 8080
+  protocol          = "tcp"
+  cidr_blocks       = ["0.0.0.0/0"]
+  security_group_id = aws_security_group.kubernetes_security_group.id
+}
 
 resource "aws_security_group_rule" "allow_icmp" {
   type              = "ingress"
@@ -133,12 +170,12 @@ resource "tls_private_key" "ssh_key" {
 }
 
 resource "local_file" "ssh_public_key" {
-  filename = pathexpand("../ansible/id_ed25519.pub")
+  filename = pathexpand("../ansible/kubernetes.pub")
   content  = tls_private_key.ssh_key.public_key_openssh
 }
 
 resource "local_file" "ssh_private_key" {
-  filename   = pathexpand("../ansible/id_ed25519")
+  filename   = pathexpand("../ansible/kubernetes.key")
   content    = tls_private_key.ssh_key.private_key_openssh
   file_permission = "0600" 
 }
@@ -261,6 +298,10 @@ output "kubernetes_loadbalancer_ips" {
   value = aws_instance.kubernetes_loadbalancer[*].public_ip
 }
 
+output "kubernetes_loadbalancer_public_dns" {
+  value = aws_instance.kubernetes_loadbalancer[0].public_dns
+}
+
 # Resource to generate Ansible inventory
 resource "null_resource" "generate_inventory" {
   # Ensure this runs after instances are created
@@ -277,7 +318,9 @@ resource "null_resource" "generate_inventory" {
   provisioner "local-exec" {
     command = <<EOT
       echo "[loadbalancer]" > ../ansible/inventory
-      echo "${join("\n", aws_instance.kubernetes_loadbalancer[*].public_ip)}" >> ../ansible/inventory
+      for i in ${join(" ", aws_instance.kubernetes_loadbalancer[*].public_ip)}; do
+        echo "$i public_dns=${aws_instance.kubernetes_loadbalancer[0].public_dns}" >> ../ansible/inventory
+      done
 
       echo "[masters]" >> ../ansible/inventory
       echo "${join("\n", aws_instance.kubernetes_controller[*].public_ip)}" >> ../ansible/inventory
@@ -286,5 +329,6 @@ resource "null_resource" "generate_inventory" {
       echo "${join("\n", aws_instance.kubernetes_worker[*].public_ip)}" >> ../ansible/inventory
     EOT
   }
+
 }
 

@@ -1,0 +1,66 @@
+---
+  # Join
+- name: Generate the join command
+  ansible.builtin.command: kubeadm token create --print-join-command
+  register: join_command
+  changed_when: false
+  become_user: ubuntu
+  delegate_to: "{{ groups['masters'][0] }}"
+  run_once: true
+
+- name: Check if node is already part of the Kubernetes cluster
+  ansible.builtin.stat:
+    path: /etc/kubernetes/kubelet.conf
+  register: kubelet_conf_status
+  become: true
+
+- name: Print kubeadm_status for debugging
+  ansible.builtin.debug:
+    var: kubelet_conf_status
+
+- name: Join worker nodes to the Kubernetes cluster
+  ansible.builtin.command:
+    cmd: "{{ join_command.stdout }}"
+  when: not kubelet_conf_status.stat.exists
+  register: join_status
+  become: true
+
+# Test application
+- name: Create a deployment for demo application
+  ansible.builtin.command: >
+    kubectl create deployment demo --image=httpd --port=80 
+  register: create_deployment
+  ignore_errors: true
+  changed_when: create_deployment.rc == 0
+  become_user: ubuntu
+  delegate_to: "{{ groups['masters'][0] }}"
+  run_once: true
+
+- name: Expose demo deployment as a service
+  ansible.builtin.command: >
+    kubectl expose deployment demo --port=80 --target-port=80 
+  register: expose_service
+  ignore_errors: true
+  changed_when: expose_service.rc == 0
+  become_user: ubuntu
+  delegate_to: "{{ groups['masters'][0] }}"
+  run_once: true
+
+- name: Create ingress for demo application
+  ansible.builtin.command: >
+    kubectl create ingress demo --class=nginx --rule={{ hostvars[groups['loadbalancer'][0]]['public_dns'] }}/=demo:80
+  register: create_ingress
+  ignore_errors: true
+  when: hostvars[groups['loadbalancer'][0]]['public_dns']
+  changed_when: create_ingress.rc == 0
+  become_user: ubuntu
+  delegate_to: "{{ groups['masters'][0] }}"
+  run_once: true
+
+- name: Output the URL for the test application
+  ansible.builtin.debug:
+    msg: |-
+      Test app is available at: http://{{ hostvars[groups['loadbalancer'][0]]['public_dns'] }}
+      Load balancer URL at: http://{{ hostvars[groups['loadbalancer'][0]]['public_dns'] }}:8080
+  when: hostvars[groups['loadbalancer'][0]]['public_dns'] is defined
+  run_once: true

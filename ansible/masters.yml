@@ -1,0 +1,7 @@
+---
+- name: Configure Kubernetes Masters
+  hosts: masters
+  become: true
+  roles:
+    - common
+    - masters

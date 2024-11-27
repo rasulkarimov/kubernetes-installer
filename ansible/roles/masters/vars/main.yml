@@ -1,0 +1,11 @@
+---
+pod_network_cidr: "10.244.0.0/16"
+
+# If a load balancer is defined in the inventory file, the "masters" role assumes it is already created and configured. 
+# The load balancer will then be used in the kubeadm init command.
+control_plane_endpoint: >-
+  {% if groups['loadbalancer'] | length > 0 %}
+  {{ groups['loadbalancer'][0] }}:6443
+  {% else %}
+  {{ server_ip.stdout }}
+  {% endif %}

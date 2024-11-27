@@ -1,0 +1,95 @@
+---
+- name: disable swapiness
+  ansible.posix.sysctl:
+    name: vm.swappiness
+    value: '1'
+    state: present
+
+- ansible.posix.sysctl:
+    name: net.ipv4.ip_forward
+    value: '1'
+    state: present
+
+- name: Update apt package index
+  ansible.builtin.apt:
+    update_cache: yes
+
+- name: Install required packages
+  ansible.builtin.apt:
+    name:
+      - software-properties-common
+      - curl
+    state: present
+    update_cache: yes
+
+# Add the Kubernetes repository
+- name: Ensure /etc/apt/keyrings directory exists
+  ansible.builtin.file:
+    path: /etc/apt/keyrings
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+- name: Download and store the Kubernetes GPG key
+  ansible.builtin.get_url:
+    url: https://pkgs.k8s.io/core:/stable:/{{ kubernetes_version }}/deb/Release.key
+    dest: /tmp/kubernetes-release.key
+    mode: '0644'
+- name: Convert Kubernetes GPG key to keyring format
+  ansible.builtin.command:
+    cmd: gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg /tmp/kubernetes-release.key
+  args:
+    creates: /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+- name: Add Kubernetes repository
+  ansible.builtin.copy:
+    dest: /etc/apt/sources.list.d/kubernetes.list
+    content: |
+      deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/{{ kubernetes_version }}/deb/ /
+    owner: root
+    group: root
+    mode: '0644'
+
+# Add the CRI-O repository
+- name: Download and store the CRI-O GPG key
+  ansible.builtin.get_url:
+    url: https://pkgs.k8s.io/addons:/cri-o:/stable:/v1.31/deb/Release.key
+    dest: /tmp/cri-o-release.key
+    mode: '0644'
+- name: Convert GPG key to keyring format
+  ansible.builtin.command:
+    cmd: gpg --dearmor -o /etc/apt/keyrings/cri-o-apt-keyring.gpg /tmp/cri-o-release.key
+  args:
+    creates: /etc/apt/keyrings/cri-o-apt-keyring.gpg
+- name: Add CRI-O repository
+  ansible.builtin.copy:
+    dest: /etc/apt/sources.list.d/cri-o.list
+    content: |
+      deb [signed-by=/etc/apt/keyrings/cri-o-apt-keyring.gpg] https://pkgs.k8s.io/addons:/cri-o:/stable:/{{ crio_version }}/deb/ /
+    owner: root
+    group: root
+    mode: '0644'
+    
+- name: Update apt package index
+  ansible.builtin.apt:
+    update_cache: yes
+
+- name: Install cri-o, kubelet, kubeadm, and kubectl
+  ansible.builtin.apt:
+    name:
+      - cri-o
+      - kubelet
+      - kubeadm
+      - kubectl
+    state: present
+
+- name: Start CRI-O service
+  ansible.builtin.service:
+    name: crio
+    state: started
+    enabled: yes
+
+- name: Ensure br_netfilter module is loaded
+  community.general.modprobe:
+    name: br_netfilter
+    state: present
+    persistent: present

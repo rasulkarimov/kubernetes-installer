@@ -30,9 +30,9 @@ defaults
     maxconn                 10000
 
 listen stats
-    bind :9000
+    bind :8080
     mode http
-    stats auth admin:admin
+    # stats auth admin:admin
     stats enable
     stats uri /
     monitor-uri /healthz
@@ -45,18 +45,7 @@ frontend kubernetes-api-server
 backend kubernetes-api-server
     balance source
     {% for host in groups['masters'] %}
-    server {{ host }} {{ hostvars[host].ansible_host }}:6443 check
-    {% endfor %}
-
-frontend machine-config-server
-    bind *:22623
-    default_backend machine-config-server
-    option tcplog
-
-backend machine-config-server
-    balance source
-    {% for host in groups['masters'] %}
-    server {{ host }} {{ hostvars[host].ansible_host }}:22623 check
+    server master{{ loop.index }} {{ host }}:6443 check
     {% endfor %}
 
 frontend ingress-http
@@ -67,7 +56,7 @@ frontend ingress-http
 backend ingress-http
     balance leastconn
     {% for host in groups['workers'] %}
-    server {{ host }} {{ hostvars[host].ansible_host }}:80 check
+    server worker{{ loop.index }} {{ host }}:31112 check
     {% endfor %}
 
 frontend ingress-https
@@ -78,5 +67,5 @@ frontend ingress-https
 backend ingress-https
     balance leastconn
     {% for host in groups['workers'] %}
-    server {{ host }} {{ hostvars[host].ansible_host }}:443 check
+    server worker{{ loop.index }} {{ host }}:32462 check
     {% endfor %}

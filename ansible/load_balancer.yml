@@ -1,0 +1,6 @@
+---
+- name: Configure Kubernetes Load Balancer
+  hosts: loadbalancer
+  become: true
+  roles:
+    - haproxy
