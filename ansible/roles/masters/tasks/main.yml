@@ -63,6 +63,14 @@
   delegate_to: "{{ groups['masters'][0] }}"
   run_once: true
 
+- name: Copy kubeconfig file to local machine as kubeconfig.cfg
+  ansible.builtin.fetch:
+    src: "/home/ubuntu/.kube/config"
+    dest: "./kubeconfig.cfg"
+    flat: yes
+  delegate_to: "{{ groups['masters'][0] }}"
+  run_once: true
+
 # Post installation configuration
 - name: Apply the Calico manifest using kubectl
   ansible.builtin.command:

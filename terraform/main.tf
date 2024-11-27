@@ -231,7 +231,7 @@ resource "aws_instance" "kubernetes_loadbalancer" {
 }
 
 resource "aws_instance" "kubernetes_controller" {
-  count               = 3  # Create 3 instances for Kubernetes controllers
+  count               = 3 
   ami                 = data.aws_ami.ubuntu.id
   instance_type       = "t3.small"
   key_name            = aws_key_pair.kubernetes_key_pair.key_name
@@ -258,7 +258,7 @@ resource "aws_instance" "kubernetes_controller" {
 }
 
 resource "aws_instance" "kubernetes_worker" {
-  count               = 3  # Create 3 instances for Kubernetes workers
+  count               = 3
   ami                 = data.aws_ami.ubuntu.id
   instance_type       = "t3.micro"
   key_name            = aws_key_pair.kubernetes_key_pair.key_name
@@ -315,6 +315,7 @@ resource "null_resource" "generate_inventory" {
     always_run = "${timestamp()}"  # Forces the resource to run on every apply
   }
 
+  # TODO: use internal IPs for worker/master, run ansible from loadbalanccer
   provisioner "local-exec" {
     command = <<EOT
       echo "[loadbalancer]" > ../ansible/inventory

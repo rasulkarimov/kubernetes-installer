@@ -36,6 +36,5 @@ Thumbs.db
 id_rsa
 id_rsa.pub
 
-# Ignore Ansible artifacts (if Terraform generates inventory files)
 inventory
-
+kubeconfig.cfg

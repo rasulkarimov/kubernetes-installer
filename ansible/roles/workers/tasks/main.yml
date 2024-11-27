@@ -25,7 +25,8 @@
   register: join_status
   become: true
 
-# Test application
+# Test application. 
+# TODO move to seperate role
 - name: Create a deployment for demo application
   ansible.builtin.command: >
     kubectl create deployment demo --image=httpd --port=80 
@@ -51,8 +52,16 @@
     kubectl create ingress demo --class=nginx --rule={{ hostvars[groups['loadbalancer'][0]]['public_dns'] }}/=demo:80
   register: create_ingress
   ignore_errors: true
-  when: hostvars[groups['loadbalancer'][0]]['public_dns']
   changed_when: create_ingress.rc == 0
+  when: hostvars[groups['loadbalancer'][0]]['public_dns']
+  become_user: ubuntu
+  delegate_to: "{{ groups['masters'][0] }}"
+  run_once: true
+
+- name: Restart demo deployment to fix issue
+  ansible.builtin.command: >
+    kubectl rollout restart deployment demo
+  ignore_errors: true
   become_user: ubuntu
   delegate_to: "{{ groups['masters'][0] }}"
   run_once: true
@@ -60,7 +69,7 @@
 - name: Output the URL for the test application
   ansible.builtin.debug:
     msg: |-
-      Test app is available at: http://{{ hostvars[groups['loadbalancer'][0]]['public_dns'] }}
-      Load balancer URL at: http://{{ hostvars[groups['loadbalancer'][0]]['public_dns'] }}:8080
+      Test app is available at: http://{{ hostvars[groups['loadbalancer'][0]]['public_dns'] }} 
+      Load balancer URL at: http://{{ hostvars[groups['loadbalancer'][0]]['public_dns'] }}:8080 
   when: hostvars[groups['loadbalancer'][0]]['public_dns'] is defined
   run_once: true
