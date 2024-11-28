@@ -1,5 +1,5 @@
-# Local Terraform state
-*.tfstate
+kubernetes.pub# Local Terraform state
+*.tfstatekubernetes.pub
 *.tfstate.*
 
 # Crash log files
@@ -38,3 +38,4 @@ id_rsa.pub
 
 inventory
 kubeconfig.cfg
+kubernetes.pub
