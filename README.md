@@ -12,8 +12,8 @@ Architecture:
 
 Tools Required:
 ~~~
-- Terraform (for testing on AWS)
 - Ansible
+- Terraform (for testing on AWS infra)
 ~~~
 
 ### Install VMs on AWS
@@ -85,7 +85,7 @@ terraform destroy
 ## For On-Premises Servers
 - **OS**: Ensure that servers are provisioned with distributions based on Debian(it's tested with Ububntu 20.4). PXE (Preboot Execution Environment) can be configured in the data center to automate provisioning.
 - **Network**: Ensure that the network interface is configured with a static IP address. Additional customizations can be applied using your scripts according to your specific site/app requirements.
-- **Load Balancer**: The Ansible roles are designed to check if a [loadbalancer] is defined in the inventory file. If provided, the HAProxy load balancer will be configured and used in the Kubernetes bootstrapping process; otherwise, Kubernetes will be deployed without a load balancer. Additionally, if "public_dns" is provided for the load balancer host, a test application will be deployed and exposed using this "public_dns". For production environments, a wildcard DNS can point to the load balancer, allowing applications with the format *.<load_balancer_dns_name> to be handled by the on-premises Kubernetes cluster.
+- **Load Balancer**: The Ansible roles are designed to check if a [loadbalancer] is defined in the inventory file. If provided, the HAProxy load balancer will be configured and used in the Kubernetes bootstrapping process; otherwise, Kubernetes will be deployed without a load balancer. Additionally, if public dns is configured for loadbalancer and provided in "public_dns" varibale for host in inventory file, a test application will be deployed and exposed using this "public_dns". For production environments, a wildcard DNS can point to the load balancer, allowing applications with the format *.<public_dns> to be handled by the on-premises Kubernetes cluster.
 
 The "kubernetes-installer" follows the official Kubernetes installation instructions with kubeadm tool. For troubleshooting and detailed setup procedures, refer to the official Kubernetes documentation: [Kubernetes Setup Docs](https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/create-cluster-kubeadm/).
 
