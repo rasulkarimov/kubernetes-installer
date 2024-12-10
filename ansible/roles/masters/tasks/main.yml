@@ -15,7 +15,8 @@
   delegate_to: "{{ groups['masters'][0] }}"
   run_once: true
 
-- name: Get the server's public IP
+  # TODO, replace 
+- name: Get the server's IP
   ansible.builtin.command: curl -s ifconfig.me
   register: server_ip
   when: not kubelet_conf_status.stat.exists

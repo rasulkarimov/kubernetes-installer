@@ -42,7 +42,7 @@ cat ../ansible/inventory
 Test SSH Access
 Credentials for Ansible SSH access are defined in the ansible.cfg file. Terraform will generate these credentials and place them in the appropriate location. Review ansible.cfg and confirm that you can connect to the instances using the defined SSH key:
 ~~~
-ssh -i ../kubernetes.key ubuntu@54.193.33.53
+ssh -i ../ansible/kubernetes.key ubuntu@54.193.33.53
 exit
 ~~~
 

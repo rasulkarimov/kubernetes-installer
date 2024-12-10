@@ -1,7 +1,14 @@
 ---
-- name: Configure Kubernetes Masters
-  hosts: masters
+- name: Configure common settings for all nodes
+  hosts: masters:workers
+  gather_facts: false
   become: true
   roles:
     - common
+
+- name: Configure Kubernetes Masters
+  hosts: masters
+  gather_facts: false
+  become: true
+  roles:
     - masters

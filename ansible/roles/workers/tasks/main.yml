@@ -57,6 +57,9 @@
   become_user: ubuntu
   delegate_to: "{{ groups['masters'][0] }}"
   run_once: true
+  until: create_ingress.rc == 0
+  retries: 10
+  delay: 10
 
 - name: Restart demo deployment to fix issue
   ansible.builtin.command: >

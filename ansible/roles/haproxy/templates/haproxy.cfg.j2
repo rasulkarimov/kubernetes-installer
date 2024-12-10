@@ -55,6 +55,9 @@ frontend ingress-http
 
 backend ingress-http
     balance leastconn
+    {% for host in groups['masters'] %}
+    server master{{ loop.index }} {{ host }}:31112 check
+    {% endfor %}
     {% for host in groups['workers'] %}
     server worker{{ loop.index }} {{ host }}:31112 check
     {% endfor %}
@@ -66,6 +69,9 @@ frontend ingress-https
 
 backend ingress-https
     balance leastconn
+    {% for host in groups['masters'] %}
+    server master{{ loop.index }} {{ host }}:31112 check
+    {% endfor %}
     {% for host in groups['workers'] %}
     server worker{{ loop.index }} {{ host }}:32462 check
     {% endfor %}
