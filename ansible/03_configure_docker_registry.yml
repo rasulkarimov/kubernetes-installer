@@ -1,3 +1,43 @@
-#add registry
-#configure /etc/conteiners/registry.conf
-#if archives provided upload them into reg
+---
+- name: Setup Docker Registry on Admin Host
+  hosts: admin
+  #become: yes
+  tasks:
+    - name: Ensure registry directory exists
+      file:
+        path: /var/lib/registry
+        state: directory
+        mode: '0755'
+
+    - name: Run Docker registry using Podman
+      shell: podman run --privileged -d --name registry -p 5000:5000 -v /var/lib/registry:/var/lib/registry --restart=always registry:2
+      register: mon_ip
+      ignore_errors: yes
+
+    # - name: Run Docker registry using Podman
+    #   community.general.podman_container:
+    #     name: registry
+    #     image: registry:2
+    #     state: started
+    #     detach: true
+    #     privileged: true
+    #     ports:
+    #       - "5000:5000"
+    #     volume:
+    #       - "/var/lib/registry:/var/lib/registry"
+    #     restart_policy: always
+
+    - name: Configure registries.conf
+      blockinfile:
+        path: /etc/containers/registries.conf
+        block: |
+          [[registry]]
+          prefix = "{{ ansible_host }}:5000"
+          location = "{{ ansible_host }}:5000"
+          insecure = true
+        insertafter: EOF
+
+    - name: Restart Podman to apply configuration changes
+      service:
+        name: podman
+        state: restarted

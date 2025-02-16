@@ -1,4 +1,4 @@
----
+ ---
 - name: Gather hostnames from Ceph hosts
   hosts: ceph
   gather_facts: yes
