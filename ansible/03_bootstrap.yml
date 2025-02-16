@@ -15,7 +15,9 @@
       ignore_errors: yes
 
     - name: Bootstrap Ceph cluster
-      command: cephadm bootstrap --image 10.1.95.23:5000/ceph/ceph --config initial-ceph.conf --mon-ip {{ mon_ip.stdout }} --initial-dashboard-user  admin --initial-dashboard-password admin007
+      command: cephadm --image 10.1.195.23:5000/ceph:v19 bootstrap --config initial-ceph.conf --mon-ip {{ mon_ip.stdout }} --initial-dashboard-user  admin --initial-dashboard-password admin007
+      args:
+        chdir: ~/kubernetes-installer/ansible/    # TODO
       register: bootstrap_result
       ignore_errors: yes
 

@@ -64,30 +64,9 @@
       ignore_errors: yes
       changed_when: podman_docker_check.rc != 0
 
-    - name: Install dnf-plugins-core
+    - name: Install Podman
       package:
-        name: dnf-plugins-core
+        name: podman
         state: present
-      when: podman_docker_check.rc != 0
-
-    - name: Add Docker CE repository
-      shell: dnf config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
-      when: podman_docker_check.rc != 0
-
-    - name: Install Docker packages
-      package:
-        name:
-          - docker-ce
-          - docker-ce-cli
-          - containerd.io
-          - docker-buildx-plugin
-          - docker-compose-plugin
-        state: latest
-      when: podman_docker_check.rc != 0
-
-    - name: Enable and start Docker service
-      systemd:
-        name: docker
-        state: started
-        enabled: yes
+        update_cache: yes
       when: podman_docker_check.rc != 0

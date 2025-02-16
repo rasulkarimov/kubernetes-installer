@@ -23,6 +23,7 @@ for IMAGE in "${IMAGES[@]}"; do
     IMAGE_NAME_TAG=$(echo "${IMAGE##*/}" | tr ':' '_')
     
     # Save the image to a tar archive
+    podman pull "${IMAGE}"
     podman save -o "${ARCHIVE_DIR}/${IMAGE_NAME_TAG}.tar" "${IMAGE}"
     
     # Output the result
