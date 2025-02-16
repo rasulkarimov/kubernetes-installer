@@ -23,23 +23,6 @@
         msg: "Systemd is available"
       when: systemd_check.stat.exists
 
-    - name: Check for Podman or Docker
-      shell: |
-        if command -v podman; then
-          echo "Podman is installed"
-        elif command -v docker; then
-          echo "Docker is installed"
-        else
-          exit 1
-        fi
-      register: container_runtime_check
-      ignore_errors: yes
-
-    - name: Validate Podman or Docker Installation
-      debug:
-        msg: "{{ container_runtime_check.stdout }}"
-      when: container_runtime_check.rc == 0
-
     - name: Check for chrony or ntpd
       shell: |
         if systemctl is-active --quiet chronyd.service; then
@@ -57,28 +40,54 @@
         msg: "{{ time_sync_check.stdout }}"
       when: time_sync_check.rc == 0
 
-    - name: Check for LVM2
-      command: lvm version
-      register: lvm2_check
+    - name: Check if LVM2 is installed
+      command: rpm -q lvm2
+      register: lvm_check
       ignore_errors: yes
 
-    - name: Validate LVM2 Installation
-      debug:
-        msg: "LVM2 is installed"
-      when: lvm2_check.rc == 0
+    - name: Install LVM2
+      package:
+        name: lvm2
+        state: present
+      when: lvm_check.rc != 0
 
+    - name: Check for Podman or Docker
+      shell: |
+        if command -v podman; then
+          echo "Podman is installed"
+        elif command -v docker; then
+          echo "Docker is installed"
+        else
+          exit 1
+        fi
+      register: podman_docker_check
+      ignore_errors: yes
+      changed_when: podman_docker_check.rc != 0
 
-# ---
-# - name: Configure common settings for all nodes
-#   hosts: masters:workers
-#   gather_facts: false
-#   become: true
-#   roles:
-#     - common
+    - name: Install dnf-plugins-core
+      package:
+        name: dnf-plugins-core
+        state: present
+      when: podman_docker_check.rc != 0
 
-# - name: Configure Kubernetes Masters
-#   hosts: masters
-#   gather_facts: false
-#   become: true
-#   roles:
-#     - masters
+    - name: Add Docker CE repository
+      shell: dnf config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+      when: podman_docker_check.rc != 0
+
+    - name: Install Docker packages
+      package:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-buildx-plugin
+          - docker-compose-plugin
+        state: latest
+      when: podman_docker_check.rc != 0
+
+    - name: Enable and start Docker service
+      systemd:
+        name: docker
+        state: started
+        enabled: yes
+      when: podman_docker_check.rc != 0

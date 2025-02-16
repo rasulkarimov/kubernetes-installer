@@ -1,6 +1,6 @@
 ---
-- name: Configure HAProxy for SSL/TLS passthrough on admin node
-  hosts: admin
+- name: Configure HAProxy for SSL/TLS passthrough on loadbalancer node
+  hosts: loadbalncer
   #become: yes
   tasks:
 

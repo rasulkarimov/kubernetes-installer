@@ -22,14 +22,12 @@ frontend dashboard_front
 frontend dashboard_front_ssl
   mode tcp
   bind *:443
-  option tcplog
   default_backend dashboard_back_ssl
 
 backend dashboard_back_ssl
-  mode tcp
+  balance roundrobin
   option httpchk GET /
-  http-check expect status 200
-
+  http-check expect status 200-399
   {% for host in groups['ceph'] %}
-  server ceph{{ loop.index }} {{ host }}:8443 ssl check verify none
+  server ceph-node{{ loop.index }} {{ host }}:8443 check check-ssl verify none
   {% endfor %}

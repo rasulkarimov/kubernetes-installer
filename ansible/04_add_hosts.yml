@@ -1,7 +1,14 @@
 ---
+- name: Gather hostnames from Ceph hosts
+  hosts: ceph
+  gather_facts: yes
+  tasks:
+    - debug:
+        msg: "Gathered hostname: {{ ansible_hostname }}"
 - name: Add all Ceph hosts to the cluster
   hosts: admin
   tasks:
+
     - name: Print all available facts
       ansible.builtin.debug:
         var: hostvars[item]['ansible_facts']['hostname']
@@ -22,7 +29,7 @@
       when: item.rc == 0
 
     - name: Add each Ceph host to the cluster
-      shell: ceph orch host add {{ ansible_facts.hostname }} {{ item }} --labels _admin
+      shell: ceph orch host add {{ hostvars[item]['ansible_hostname'] }} {{ hostvars[item]['ansible_host'] | default(item) }} --labels _admin
       with_items: "{{ groups['ceph'] }}"
       register: host_addition
       ignore_errors: yes
