@@ -1,0 +1,29 @@
+---
+- name: Install cephadm on admin group
+  hosts: admin
+  tasks:
+  
+    - name: Download cephadm
+      get_url:
+        url: https://download.ceph.com/rpm-19.2.0/el9/noarch/cephadm
+        dest: ./
+        mode: '0755'
+
+    - name: Ensure cephadm is executable
+      file:
+        path: ./cephadm
+        mode: '0755'
+        state: file
+
+    - name: Add Ceph repository and install cephadm package
+      shell: |
+        ./cephadm add-repo --release squid
+        ./cephadm install
+
+    - name: Confirm cephadm installation
+      command: which cephadm
+      register: cephadm_path
+
+    - name: Display cephadm path
+      debug:
+        msg: "Cephadm is installed at: {{ cephadm_path.stdout }}"

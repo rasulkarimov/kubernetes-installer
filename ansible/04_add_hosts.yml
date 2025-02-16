@@ -1,0 +1,34 @@
+---
+- name: Add all Ceph hosts to the cluster
+  hosts: admin
+  tasks:
+    - name: Print all available facts
+      ansible.builtin.debug:
+        var: hostvars[item]['ansible_facts']['hostname']
+      with_items: "{{ groups['admin'] }}"
+
+    - name: Install the cluster's public SSH key on Ceph hosts
+      shell: ssh-copy-id -f -i /etc/ceph/ceph.pub root@{{ item }}
+      with_items: "{{ groups['ceph'] }}"
+      delegate_to: 127.0.0.1
+      ignore_errors: yes
+      register: ssh_key_installation
+
+    - name: Display SSH key installation results
+      debug:
+        msg: "SSH key installed for: {{ item.item }}"
+        verbosity: 1
+      with_items: "{{ ssh_key_installation.results }}"
+      when: item.rc == 0
+
+    - name: Add each Ceph host to the cluster
+      shell: ceph orch host add {{ ansible_facts.hostname }} {{ item }} --labels _admin
+      with_items: "{{ groups['ceph'] }}"
+      register: host_addition
+      ignore_errors: yes
+
+    - name: Display host addition results
+      debug:
+        msg: "Host added: {{ item.item }} with result: {{ item.stdout }}"
+      with_items: "{{ host_addition.results }}"
+      when: item.rc == 0

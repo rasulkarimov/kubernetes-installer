@@ -1,0 +1,47 @@
+---
+- name: Bootstrap Ceph cluster
+  hosts: admin
+  tasks:
+
+    - name: Ensure SSH service is running
+      service:
+        name: sshd
+        state: started
+        enabled: true
+
+    - name: Fetch first monitor IP
+      shell: hostname -I | awk '{print $1}'
+      register: mon_ip
+      ignore_errors: yes
+
+    - name: Bootstrap Ceph cluster
+      command: cephadm bootstrap --mon-ip {{ mon_ip.stdout }}
+      register: bootstrap_result
+      ignore_errors: yes
+
+    - name: Display bootstrap results
+      debug:
+        msg: 
+          - "Bootstrap Command Output: {{ bootstrap_result.stdout }}"
+          - "Monitor IP Used: {{ mon_ip.stdout }}"
+
+####### Install ceph-common package
+
+    - name: Install ceph-common package
+      shell: cephadm install ceph-common
+
+    - name: Verify ceph command version
+      command: ceph -v
+      register: ceph_version_result
+
+    - name: Display ceph command version
+      debug:
+        msg: "Ceph version: {{ ceph_version_result.stdout }}"
+
+    - name: Verify Ceph status
+      command: ceph -s
+      register: ceph_status_result
+
+    - name: Display Ceph status
+      debug:
+        msg: "Ceph status: {{ ceph_status_result.stdout }}"
