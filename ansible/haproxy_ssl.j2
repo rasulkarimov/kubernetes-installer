@@ -5,6 +5,14 @@ defaults
   timeout client 50s
   timeout server 450s
 
+listen stats
+    bind :8080
+    mode http
+    # stats auth admin:admin
+    stats enable
+    stats uri /
+    monitor-uri /healthz
+
 frontend dashboard_front
   mode http
   bind *:80
