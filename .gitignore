@@ -36,6 +36,5 @@ Thumbs.db
 id_rsa
 id_rsa.pub
 
-inventory
 kubeconfig.cfg
 kubernetes.pub

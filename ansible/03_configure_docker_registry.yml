@@ -1,0 +1,3 @@
+#add registry
+#configure /etc/conteiners/registry.conf
+#if archives provided upload them into reg
