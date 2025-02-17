@@ -1,4 +1,4 @@
-docker_registry_enabled: false
+docker_registry_enabled: true
 loadbalancer_enabled: true
 packages_repositiry_enabled: true
 create_default_storage_on_all_devices: false
