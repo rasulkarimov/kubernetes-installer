@@ -9,6 +9,7 @@ mkdir -p "${ARCHIVE_DIR}"
 # List of images to archive
 IMAGES=(
     "quay.io/ceph/ceph:v19"
+    "quay.io/ceph/ceph@sha256:05c6b08a3c04bb8df7fda127ccdc07426704bbc85bb9ba975b6ef95fc787ba8b"
     "quay.io/podman/hello:latest"
     "quay.io/prometheus/prometheus:v2.51.0"
     "quay.io/ceph/grafana:10.4.0"
