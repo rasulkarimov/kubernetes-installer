@@ -66,3 +66,15 @@
     - name: Change Standby Behaviour for loadbalancer
       command: ceph config set mgr mgr/dashboard/standby_behaviour "error"
       when: loadbalancer_enabled
+
+    - name: Add storage, consume all available devices
+      command: ceph orch apply osd --all-available-devices
+      when: create_default_storage_on_all_devices
+
+    - name: Create a CephFS volume named "cephfs" (MDS deamons are created)
+      command: ceph fs volume create cephfs
+      when: create_default_mds
+
+    - name: Deploy RGWs
+      command: ceph orch apply rgw test
+      when: create_default_rgw

@@ -40,7 +40,19 @@
         msg: "{{ time_sync_check.stdout }}"
       when: time_sync_check.rc == 0
 
-# add Time synchronization integrating task
+    - name: Add NTP source using chronyc
+      command: chronyc add server {{ ntp_server_source }} iburst
+      when: ntp_server_source is defined
+    
+    - name: Log skipping NTP source addition
+      debug:
+        msg: "No NTP server source provided; skipping addition. Configure it manually."
+      when: ntp_server_source is not defined
+
+    - name: Restart Chrony to apply changes
+      service:
+        name: chronyd
+        state: restarted
 
     - name: Check if LVM2 is installed
       command: rpm -q lvm2
