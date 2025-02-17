@@ -40,6 +40,8 @@
         msg: "{{ time_sync_check.stdout }}"
       when: time_sync_check.rc == 0
 
+# add Time synchronization integrating task
+
     - name: Check if LVM2 is installed
       command: rpm -q lvm2
       register: lvm_check
