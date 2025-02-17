@@ -1,6 +1,6 @@
 ---
 - name: Setup Docker Registry on Admin Host
-  hosts: admin
+  hosts: loadbalncer
   #become: yes
   tasks:
     - name: Ensure registry directory exists
@@ -9,10 +9,10 @@
         state: directory
         mode: '0755'
 
-    - name: Run Docker registry using Podman
-      shell: podman run --privileged -d --name registry -p 5000:5000 -v /var/lib/registry:/var/lib/registry --restart=always registry:2
-      register: mon_ip
-      ignore_errors: yes
+    # - name: Run Docker registry using Podman
+    #   shell: podman run --privileged -d --name registry -p 5000:5000 -v /var/lib/registry:/var/lib/registry --restart=always registry:2
+    #   register: mon_ip
+    #   ignore_errors: yes
 
     # - name: Run Docker registry using Podman
     #   community.general.podman_container:
@@ -36,6 +36,16 @@
           location = "{{ ansible_host }}:5000"
           insecure = true
         insertafter: EOF
+      register: config_result
+
+    - name: Copy registries.conf to all hosts
+      copy:
+        src: /etc/containers/registries.conf
+        dest: /etc/containers/registries.conf
+      delegate_to: "{{ item }}"
+      with_items: "{{ groups['all'] }}"
+      run_once: true
+      when: config_result.changed
 
     - name: Restart Podman to apply configuration changes
       service:

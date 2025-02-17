@@ -1,6 +1,6 @@
 ---
 - name: Install cephadm on admin group
-  hosts: admin
+  hosts: loadbalncer
   tasks:
   
     - name: Download cephadm

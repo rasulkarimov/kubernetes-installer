@@ -1,6 +1,6 @@
 ---
 - name: Bootstrap Ceph cluster
-  hosts: admin
+  hosts: loadbalncer
   tasks:
 
     - name: Ensure SSH service is running
@@ -14,10 +14,26 @@
       register: mon_ip
       ignore_errors: yes
 
+    - name: Get playbook directory
+      set_fact:
+        playbook_dir_rescue: "{{ inventory_dir | default(lookup('env', 'PWD')) }}"
+      tags: always
+
     - name: Bootstrap Ceph cluster
-      command: cephadm --image 10.1.195.23:5000/ceph:v19 bootstrap --config initial-ceph.conf --mon-ip {{ mon_ip.stdout }} --initial-dashboard-user  admin --initial-dashboard-password admin007
+      command: >-
+          cephadm
+          {% if docker_registry_enabled %}
+          --image 10.1.195.23:5000/ceph:v19
+          {% endif %} 
+          bootstrap
+          {% if docker_registry_enabled %}
+          --config initial-ceph.conf
+          {% endif %}
+          --mon-ip {{ mon_ip.stdout }}
+          --initial-dashboard-user  admin
+          --initial-dashboard-password admin007
       args:
-        chdir: ~/kubernetes-installer/ansible/    # TODO
+        chdir: "{{ playbook_dir }}"
       register: bootstrap_result
       ignore_errors: yes
 
@@ -27,8 +43,7 @@
           - "Bootstrap Command Output: {{ bootstrap_result.stdout }}"
           - "Monitor IP Used: {{ mon_ip.stdout }}"
 
-####### Install ceph-common package
-
+    ####### Install ceph-common package
     - name: Install ceph-common package
       shell: cephadm install ceph-common
 
@@ -48,6 +63,6 @@
       debug:
         msg: "Ceph status: {{ ceph_status_result.stdout }}"
 
-
-# TODO if loadbalancer is enabled
-# ceph config set mgr mgr/dashboard/standby_behaviour "error"
+    - name: Change Standby Behaviour for loadbalancer
+      command: ceph config set mgr mgr/dashboard/standby_behaviour "error"
+      when: loadbalancer_enabled

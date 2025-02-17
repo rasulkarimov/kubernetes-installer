@@ -1,8 +1,8 @@
-# Kubernetes Installer
+# Ceph Installer
 
 ## Overview
 
-This repository provides a streamlined approach to deploying a Kubernetes cluster using Ansible. It supports on-premises servers and, in the "Quick Start" section, provides an example using AWS EC2 instances for quick testing and development. 
+This repository provides a streamlined approach to deploying a Ceph cluster using Ansible. It supports on-premises servers and, in the "Quick Start" section, provides an example using AWS EC2 instances for quick testing and development. 
 
 Architecture:
 
@@ -25,14 +25,14 @@ export AWS_SECRET_ACCESS_KEY=<aws_secret_access_key>
 
 Use Terraform to provision EC2 instances(Ubuntu was tested in this example). The Terraform script will automatically populate the ansible/inventory file with the public IPs of the created instances.
 ~~~
-git clone https://github.com/rasulkarimov/kubernetes-installer.git
-cd kubernetes-installer/terraform
+git clone https://github.com/rasulkarimov/ceph-installer.git
+cd Ceph-installer/terraform
 terraform init
 terraform plan
 terraform apply
 ~~~
 
-### Prepare ansible for Kubernetes cluster installation
+### Prepare ansible for Ceph cluster installation
 After running Terraform, check that the ansible/inventory file contains the IP addresses of the created instances:
 ~~~
 cat ../ansible/inventory
@@ -42,11 +42,11 @@ cat ../ansible/inventory
 Test SSH Access
 Credentials for Ansible SSH access are defined in the ansible.cfg file. Terraform will generate these credentials and place them in the appropriate location. Review ansible.cfg and confirm that you can connect to the instances using the defined SSH key:
 ~~~
-ssh -i ../ansible/kubernetes.key ubuntu@54.193.33.53
+ssh -i ../ansible/Ceph.key ubuntu@54.193.33.53
 exit
 ~~~
 
-Run the Ansible playbook to install the Kubernetes cluster:
+Run the Ansible playbook to install the Ceph cluster:
 ~~~
 cd ../ansible
 ansible-playbook site.yml
@@ -64,7 +64,7 @@ When you open the load balancer's URL, you can check the HAProxy statistics and 
 Check Node Status
 Log in to the master node and verify that all nodes are up and ready:
 ~~~
-ssh -i kubernetes.key ubuntu@<master_node_ip>
+ssh -i Ceph.key ubuntu@<master_node_ip>
 kubectl get nodes -o wide
 ~~~
 ![alt text](images/image-5.png)
@@ -85,12 +85,12 @@ terraform destroy
 ## For On-Premises Servers
 - **OS**: Ensure that servers are provisioned with distributions based on Debian(it's tested with Ububntu 20.4). PXE (Preboot Execution Environment) can be configured in the data center to automate provisioning.
 - **Network**: Ensure that the network interface is configured with a static IP address. Additional customizations can be applied using your scripts according to your specific site/app requirements.
-- **Load Balancer**: The Ansible roles are designed to check if a [loadbalancer] is defined in the inventory file. If provided, the HAProxy load balancer will be configured and used in the Kubernetes bootstrapping process; otherwise, Kubernetes will be deployed without a load balancer. Additionally, if public dns is configured for loadbalancer and provided in "public_dns" varibale for host in inventory file, a test application will be deployed and exposed using this "public_dns". For production environments, a wildcard DNS can point to the load balancer, allowing applications with the format *.<public_dns> to be handled by the on-premises Kubernetes cluster.
+- **Load Balancer**: The Ansible roles are designed to check if a [loadbalancer] is defined in the inventory file. If provided, the HAProxy load balancer will be configured and used in the Ceph bootstrapping process; otherwise, Ceph will be deployed without a load balancer. Additionally, if public dns is configured for loadbalancer and provided in "public_dns" varibale for host in inventory file, a test application will be deployed and exposed using this "public_dns". For production environments, a wildcard DNS can point to the load balancer, allowing applications with the format *.<public_dns> to be handled by the on-premises Ceph cluster.
 
-The "kubernetes-installer" follows the official Kubernetes installation instructions with kubeadm tool. For troubleshooting and detailed setup procedures, refer to the official Kubernetes documentation: [Kubernetes Setup Docs](https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/create-cluster-kubeadm/).
+The "Ceph-installer" follows the official Ceph installation instructions with kubeadm tool. For troubleshooting and detailed setup procedures, refer to the official Ceph documentation: [Ceph Setup Docs](https://Ceph.io/docs/setup/production-environment/tools/kubeadm/create-cluster-kubeadm/).
 
-For Kubernetes networking, Calico CNI is used: [Calico Documentation](https://docs.tigera.io/calico/latest/about/)
+For Ceph networking, Calico CNI is used: [Calico Documentation](https://docs.tigera.io/calico/latest/about/)
 
-For the ingress controller, NGINX is used: [NGINX Ingress Controller](https://github.com/kubernetes/ingress-nginx/blob/main/README.md)
+For the ingress controller, NGINX is used: [NGINX Ingress Controller](https://github.com/Ceph/ingress-nginx/blob/main/README.md)
 
 
