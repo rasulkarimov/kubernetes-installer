@@ -10,6 +10,37 @@ Architecture:
 
 ## Quick Start
 
+# Installation Instructions for Local Ceph Dependencies
+
+This guide explains how to set up the local repository of Ceph dependencies on your host system.
+
+## Prerequisites
+- Ensure you have root or sudo privileges.
+- Transfer the `local-ceph-dependencies.tar.gz` tarball to your host system.
+
+## Steps to Set Up the Local Repository
+
+1. **Extract the Tarball**:
+   - Navigate to the `/var` directory on your host system.
+   - Extract the tarball using the following command:
+
+   ```bash
+   tar -xzvf local-ceph-dependencies.tar.gz -C /var
+
+Create a new local repository configuration file in /etc/yum.repos.d/.
+sudo nano /etc/yum.repos.d/local-ceph-dependencies.repo
+
+Add the following configuration to the file:
+[Local-Ceph-Dependencies]
+name=Local Ceph Dependencies Repository
+baseurl=file:///var/local-ceph-dependencies
+enabled=1
+gpgcheck=0
+
+Refresh the YUM cache to recognize the new local repository.
+sudo yum clean all
+sudo yum makecache
+
 Tools Required:
 ~~~
 - Ansible

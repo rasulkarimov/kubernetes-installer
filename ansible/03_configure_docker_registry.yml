@@ -51,3 +51,5 @@
       service:
         name: podman
         state: restarted
+
+# TODO configure ssl, authorization

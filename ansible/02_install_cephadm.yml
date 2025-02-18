@@ -5,7 +5,7 @@
   
     - name: Download cephadm
       get_url:
-        url: https://download.ceph.com/rpm-19.2.0/el9/noarch/cephadm
+        url: https://download.ceph.com/rpm-19.2.1/el9/noarch/cephadm
         dest: ./
         mode: '0755'
 

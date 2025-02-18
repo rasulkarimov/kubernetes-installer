@@ -29,6 +29,7 @@
           {% if docker_registry_enabled %}
           --config initial-ceph.conf
           {% endif %}
+          --registry-url 10.1.195.23:5000
           --mon-ip {{ mon_ip.stdout }}
           --initial-dashboard-user  admin
           --initial-dashboard-password admin007

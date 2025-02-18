@@ -1,0 +1,16 @@
+---
+- name: Install cephadm on admin group
+  hosts: localhost
+  tasks:
+  
+    - name: Download cephadm
+      get_url:
+        url: https://download.ceph.com/rpm-19.2.1/el9/noarch/
+        dest: ./
+        mode: '0755'
+
+    - name: Ensure cephadm is executable
+      file:
+        path: ./cephadm
+        mode: '0755'
+        state: file
