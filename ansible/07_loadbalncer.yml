@@ -23,6 +23,15 @@
         state: started
         enabled: true
 
+    - name: Change Standby Behaviour when loadbalancer enabled
+      command: ceph config set mgr mgr/dashboard/standby_behaviour "error"
+      delegate_to: "{{ groups['admin'][0] }}"
+
+    - name: Info
+      debug:
+        msg: >-
+          Ceph Dashboard available on the url: https://{{ ansible_host }}
+
   handlers:
     - name: Restart HAProxy
       service:

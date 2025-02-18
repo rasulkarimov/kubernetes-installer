@@ -4,6 +4,11 @@
 ARCHIVE_DIR="./docker_archives"
 REGISTRY="10.1.195.23:5000"
 
+# If a command-line argument is provided, use it as the registry; otherwise, use the default
+REGISTRY="${1:-$DEFAULT_REGISTRY}"
+
+echo "Using registry: $REGISTRY"
+
 # Load and push each archived image
 for ARCHIVE in "${ARCHIVE_DIR}"/*.tar; do
     # Extract the image name and tag from the archive file name

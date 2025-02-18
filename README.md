@@ -2,126 +2,168 @@
 
 ## Overview
 
-This repository provides a streamlined approach to deploying a Ceph cluster using Ansible. It supports on-premises servers and, in the "Quick Start" section, provides an example using AWS EC2 instances for quick testing and development. 
+This repository provides a streamlined approach to deploying a Ceph cluster using Ansible. It supports on-premises servers and, in the "Quick Start" section, provides an example with CentOS 9 operating system (Rocky Linux 9).
 
-Architecture:
+Architecture example:
 
-![alt text](images/image.png)
+![alt text](image.png)
 
 ## Quick Start
 
-# Installation Instructions for Local Ceph Dependencies
+### Installing a Ceph Cluster in a Private Datacenter
 
-This guide explains how to set up the local repository of Ceph dependencies on your host system.
+For installing a Ceph cluster without internet access, you need to configure a private repository. Follow these steps:
 
-## Prerequisites
-- Ensure you have root or sudo privileges.
-- Transfer the `local-ceph-dependencies.tar.gz` tarball to your host system.
+1. **Configure Private Repository**:  
+   Place `local-ceph-dependencies_v19.2.0.tar.gz` in the root directory of the admin node. During validation and installation, Ansible will copy this file to the `/var/<repo>` directory and configure this directory as a repository.
 
-## Steps to Set Up the Local Repository
+   - **Note**: If this file is not provided, the repository configuration task will be skipped.
 
-1. **Extract the Tarball**:
-   - Navigate to the `/var` directory on your host system.
-   - Extract the tarball using the following command:
+2. **Future Package Collection**:  
+   At the end of this document, guidance is provided for collecting packages for future Ceph versions.
+
+### Prepare Images for Private Docker Registry
+
+The recent version of Ceph is recommended to be installed using the `cephadm` tool, which orchestrates Ceph services, running and managing their deployment in containers. In data centers without internet access, you need to:
+
+1. **Download Images**:
+   - Images must be downloaded to the `docker_registry` server.
+   - Ansible will configure the private Docker registry and push all uploaded images into it, so Ceph can fetch them within the private network. 
+
+2. **Use `00_download_artefact.sh`**:
+   - Review the `00_download_artefact.sh` file for images and execute it on a machine with internet access. It will download images and archive them for installation procedures.
 
    ```bash
-   tar -xzvf local-ceph-dependencies.tar.gz -C /var
+   ./00_download.sh
+   Trying to pull quay.io/ceph/ceph:v19.2.0...
+   Getting image source signatures
+   ```
 
-Create a new local repository configuration file in /etc/yum.repos.d/.
-sudo nano /etc/yum.repos.d/local-ceph-dependencies.repo
 
-Add the following configuration to the file:
-[Local-Ceph-Dependencies]
-name=Local Ceph Dependencies Repository
-baseurl=file:///var/local-ceph-dependencies
-enabled=1
-gpgcheck=0
+### Configure Ansible User with Sudo Access
 
-Refresh the YUM cache to recognize the new local repository.
-sudo yum clean all
-sudo yum makecache
+To remotely manage nodes, the Ansible user must be able to log into all the Red Hat Ceph Storage nodes with root privileges to install software and create configuration files without prompting for a password.
 
-Tools Required:
+**Ensure pre-requisites:**
+
+- Ensure both `git` and `ansible` are installed on the servers, as the remaining configurations are managed through Ansible scripts.
+
+### Repository Setup
+
+1. **Clone the Repository**:
+   - Use Git to clone the required repository.
+
+   ```bash
+   git clone https://github.com/rasulkarimov/ceph-installer.git
+   ```
+
+2. **Initialize and Apply Terraform**:
+
+Initialize and Apply Terraform:
+
+Prepare your infrastructure using Terraform.
 ~~~
-- Ansible
-- Terraform (for testing on AWS infra)
-~~~
-
-### Install VMs on AWS
-Ensure AWS credentials are set in your environment:
-~~~
-export AWS_ACCESS_KEY_ID=<aws_access_key_id>
-export AWS_SECRET_ACCESS_KEY=<aws_secret_access_key>
-~~~
-
-Use Terraform to provision EC2 instances(Ubuntu was tested in this example). The Terraform script will automatically populate the ansible/inventory file with the public IPs of the created instances.
-~~~
-git clone https://github.com/rasulkarimov/ceph-installer.git
-cd Ceph-installer/terraform
 terraform init
 terraform plan
 terraform apply
 ~~~
 
-### Prepare ansible for Ceph cluster installation
-After running Terraform, check that the ansible/inventory file contains the IP addresses of the created instances:
+3. **Review Ansible Configuration (ansible.cfg)**:
+
+Ensure the Ansible configuration is set up with the appropriate credentials.
+~~~
+[defaults]
+remote_user = root
+inventory = ./inventory
+private_key_file = ~/.ssh/id_rsa
+~~~
+
+**Configure Private Repository with RPM Packages**
+Use Ansible playbooks to configure your private repository with RPM packages.
+~~~
+ansible-playbook setup-repo.yml
+~~~
+
+Validate Servers and Install Required Packages
+Run an Ansible playbook to validate the servers and ensure all necessary packages are installed.
+~~~
+ansible-playbook validate-and-install.yml
+~~~
+
+Install Private Registry
+Steps to configure the private registry and bootstrap the first Ceph cluster:
+
+Review Inventory File:
+
+Check the inventory file to ensure it lists all relevant nodes.
 ~~~
 cat ../ansible/inventory
 ~~~
-<img src="images/image-1.png" alt="alt text" width="50%" />
 
-Test SSH Access
-Credentials for Ansible SSH access are defined in the ansible.cfg file. Terraform will generate these credentials and place them in the appropriate location. Review ansible.cfg and confirm that you can connect to the instances using the defined SSH key:
+Inventory Example
+
+Bootstrap the Cluster:
 ~~~
-ssh -i ../ansible/Ceph.key ubuntu@54.193.33.53
-exit
 ~~~
 
-Run the Ansible playbook to install the Ceph cluster:
+Start setting up the cluster with Ceph.
 ~~~
-cd ../ansible
+ceph -s
+~~~
+Add Nodes to the Cluster:
+
+Use Ansible playbooks to add additional nodes to your cluster.
+~~~
 ansible-playbook site.yml
 ~~~
 
-When the installation is complete, a test application will be deployed. Its URL, along with the load balancer's URL, will be provided in the output:
-![alt text](images/image-6.png)
-
-Open the test app URL and confirm that it is available:
-![alt text](images/image-3.png)
-
-When you open the load balancer's URL, you can check the HAProxy statistics and node statuses:
-<img src="images/image-4.png" alt="alt text" width="70%" />
-
-Check Node Status
-Log in to the master node and verify that all nodes are up and ready:
+Configure HAProxy for Ceph Dashboard Exposure:
+Ensure that HAProxy is configured to expose the Ceph Dashboard.
 ~~~
-ssh -i Ceph.key ubuntu@<master_node_ip>
-kubectl get nodes -o wide
-~~~
-![alt text](images/image-5.png)
-
-Or use kubeconfig.cfg which is copied into ./ansible/kubeconfig.cfg folder on PC duriong kubernees installation process:
-~~~
-kubectl --kubeconfig=kubeconfig.cfg get nodes -o wide
+ansible-playbook configure-haproxy.yml
 ~~~
 
+Upon completion, a link to the Ceph Dashboard URL will be provided.
 
-### Destroy AWS EC2 Infrastructure
-To tear down the testing environment on AWS, use the following command:
+Useful Commands
+Manage Ceph cluster hosts and labels, deploy daemons, and monitor OSDs using the following commands:
+
+Add Host Labels:
 ~~~
-cd ../terraform
-terraform destroy
+ceph orch host label add HOSTNAME LABEL
+~~~
+List Hosts and Labels:
+~~~
+ceph orch host ls
+~~~
+Deploy Daemons Using Labels:
+~~~
+ceph orch apply mon label:mon
+~~~
+Or specify host placement:
+~~~
+ceph orch apply mon --placement="3 host01 host02 host03"
+~~~
+List Storage Devices:
+~~~
+ceph orch device ls
+~~~
+Create New OSDs:
+~~~
+ceph orch daemon add osd <host>:<device-path>
+~~~
+Or deploy on all available devices:
+~~~
+ceph orch apply osd --all-available-devices
+~~~
+Monitor OSD:
+~~~
+ceph orch osd rm status
+~~~
+Clean Devices:
+~~~
+ceph orch device zap <host> /dev/vdb --force
 ~~~
 
-## For On-Premises Servers
-- **OS**: Ensure that servers are provisioned with distributions based on Debian(it's tested with Ububntu 20.4). PXE (Preboot Execution Environment) can be configured in the data center to automate provisioning.
-- **Network**: Ensure that the network interface is configured with a static IP address. Additional customizations can be applied using your scripts according to your specific site/app requirements.
-- **Load Balancer**: The Ansible roles are designed to check if a [loadbalancer] is defined in the inventory file. If provided, the HAProxy load balancer will be configured and used in the Ceph bootstrapping process; otherwise, Ceph will be deployed without a load balancer. Additionally, if public dns is configured for loadbalancer and provided in "public_dns" varibale for host in inventory file, a test application will be deployed and exposed using this "public_dns". For production environments, a wildcard DNS can point to the load balancer, allowing applications with the format *.<public_dns> to be handled by the on-premises Ceph cluster.
-
-The "Ceph-installer" follows the official Ceph installation instructions with kubeadm tool. For troubleshooting and detailed setup procedures, refer to the official Ceph documentation: [Ceph Setup Docs](https://Ceph.io/docs/setup/production-environment/tools/kubeadm/create-cluster-kubeadm/).
-
-For Ceph networking, Calico CNI is used: [Calico Documentation](https://docs.tigera.io/calico/latest/about/)
-
-For the ingress controller, NGINX is used: [NGINX Ingress Controller](https://github.com/Ceph/ingress-nginx/blob/main/README.md)
-
-
+TODO
+Add instructions to create an RPM repository, providing guidance on repository setup and management for Ceph.

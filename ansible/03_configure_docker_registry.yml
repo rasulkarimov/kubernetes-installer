@@ -1,16 +1,20 @@
 ---
 - name: Setup Docker Registry on Admin Host
-  hosts: loadbalncer
+  hosts: docker_registry
   #become: yes
   tasks:
-    - name: Ensure registry directory exists
+    - name: Ensure /opt/registry/{auth,certs,data} directories exist
       file:
-        path: /var/lib/registry
+        path: /opt/registry/{{ item }}
         state: directory
-        mode: '0755'
+        mode: '0755' 
+      loop:
+        - auth
+        - certs
+        - data
 
     - name: Run Docker registry using Podman
-      shell: podman run --privileged -d --name registry -p 5000:5000 -v /var/lib/registry:/var/lib/registry --restart=always registry:2.8.3
+      shell: podman run --privileged -d --name registry -p 5000:5000 -v /opt/registry/data:/var/lib/registry --restart=always registry:2.8.3
       register: mon_ip
       ignore_errors: yes
 

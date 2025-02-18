@@ -1,7 +1,9 @@
+# day one
 docker_registry_enabled: true
 loadbalancer_enabled: true
 packages_repositiry_enabled: true
+ntp_server_source: 100.125.0.31 # when NTP server source provided, it will be configured during validate-install step
+ceph_image: ceph:v19.2.0
 create_default_storage_on_all_devices: false
 create_default_mds: false
 create_default_rgw: false
-#ntp_server_source: 100.125.0.31 # put NTP server source to confgigure it during validation step

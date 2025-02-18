@@ -1,20 +1,9 @@
 ---
 - name: Bootstrap Ceph cluster
-  hosts: loadbalncer
+  hosts: admin
   tasks:
 
-    - name: Ensure SSH service is running
-      service:
-        name: sshd
-        state: started
-        enabled: true
-
-    - name: Fetch first monitor IP
-      shell: hostname -I | awk '{print $1}'
-      register: mon_ip
-      ignore_errors: yes
-
-    - name: Get playbook directory
+    - name: Get playbook directory for initial-ceph.conf file 
       set_fact:
         playbook_dir_rescue: "{{ inventory_dir | default(lookup('env', 'PWD')) }}"
       tags: always
@@ -23,16 +12,16 @@
       command: >-
           cephadm
           {% if docker_registry_enabled %}
-          --image 10.1.195.23:5000/ceph:v19
+          --image {{ groups['docker_registry'][0] }}:5000/ceph:v19.2.0
           {% endif %} 
           bootstrap
           {% if docker_registry_enabled %}
           --config initial-ceph.conf
           {% endif %}
-          --registry-url 10.1.195.23:5000
-          --mon-ip {{ mon_ip.stdout }}
           --initial-dashboard-user  admin
           --initial-dashboard-password admin007
+          --mon-ip {{ ansible_host }}
+
       args:
         chdir: "{{ playbook_dir }}"
       register: bootstrap_result
@@ -42,11 +31,7 @@
       debug:
         msg: 
           - "Bootstrap Command Output: {{ bootstrap_result.stdout }}"
-          - "Monitor IP Used: {{ mon_ip.stdout }}"
-
-    ####### Install ceph-common package
-    - name: Install ceph-common package
-      shell: cephadm install ceph-common
+          - "Monitor IP Used: {{ ansible_host }}"
 
     - name: Verify ceph command version
       command: ceph -v
@@ -64,7 +49,7 @@
       debug:
         msg: "Ceph status: {{ ceph_status_result.stdout }}"
 
-    - name: Change Standby Behaviour for loadbalancer
+    - name: Change Standby Behaviour when loadbalancer enabled
       command: ceph config set mgr mgr/dashboard/standby_behaviour "error"
       when: loadbalancer_enabled
 

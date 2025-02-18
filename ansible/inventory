@@ -2,7 +2,7 @@ loadbalncer:
   hosts:
     10.1.195.23:
 docker_registry:
-  host:
+  hosts:
     10.1.195.23:
 admin:
   hosts:
