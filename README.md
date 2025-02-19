@@ -10,8 +10,6 @@ Basic Ceph Storage Cluster Architecture Overview:
 
 ## Quick Start
 
-### Installing a Ceph Cluster in a Private Datacenter
-
 **Prerequsits**
 * git 
 * ansible
@@ -22,7 +20,7 @@ Other tools will be deployed with ansible.
 For installing a Ceph cluster without internet access, you need to configure a private repository. Follow these steps:
 
 
-### Configure Ansible User with Sudo Access
+**Configure Ansible User with Sudo Access**
 
 To remotely manage nodes, the Ansible user must be able to log into all nodes with root privileges to install software and create configuration files without prompting for a password.
 ~~~
@@ -60,7 +58,6 @@ become_ask_pass = False
 ~~~
 
 **Fill inventory file with your hosts**
-
 ~~~
 [admin]
 10.1.195.23
@@ -99,30 +96,52 @@ Setting deploy_private_rpm_repository: false will configure hosts to download Ce
 
 **Prepare required packages for internet disconnected installation**
 
-For an internet-disconnected installation, you we to prepare the appropriate Docker images and RPM files. In the Git repository with Ansible playbooks, two shell scripts are provided to download the required packages for installation from the internet. Run these scripts from a machine with internet access. Then, place them in the same location during the Ansible installation; if provided in the same location where they were downloaded by the script, Ansible will add them to the local RPM repository and Docker registries.
+For an internet-disconnected installation, we need to prepare the appropriate Docker images and RPM files. In the Git repository with Ansible playbooks, two shell scripts are provided to download the required packages for installation from the internet. Run these scripts from a machine with internet access. Then, place them in the location with Ansible playbooks during the installation; if provided in the same location where they were downloaded by the script, Ansible will automatically add them to the local RPM repository and Docker registries.
 Make sure that CEPH_VERSION variable defined in shell scripts match with ceph_version defined in group_vars/all.yml 
 
 Download docker images:
+~~~
+./00_download_docker_images.sh 
+Trying to pull quay.io/ceph/ceph:v19.2.0...
+~~~
 
-![alt text](png/image-2.png)
+When the script is completed, ensure that the Docker images are saved in the ./docker_archives/ directory:
+~~~
+ls -l docker_archives/
+total 2096664
+-rw-r--r-- 1 presight presight   66556416 Feb 19 18:03 alertmanager_v0.25.0.tar
+-rw-r--r-- 1 presight presight 1303678464 Feb 19 18:02 ceph_v19.2.0.tar
+-rw-r--r-- 1 presight presight  438046720 Feb 19 18:03 grafana_10.4.0.tar
+-rw-r--r-- 1 presight presight   23867904 Feb 19 18:03 node-exporter_v1.7.0.tar
+-rw-r--r-- 1 presight presight  262765056 Feb 19 18:03 prometheus_v2.51.0.tar
+-rw-r--r-- 1 presight presight   26022912 Feb 19 18:03 registry_2.8.3.tar
+-rw-r--r-- 1 presight presight   26022912 Feb 19 18:03 registry_2.tar
+~~~
 
 Download RPMs:
+~~~
+./00_download_rpm_packages.sh
+~~~
 
-![alt text](png/image-4.png)
+All packages with their dependencies have been downloaded and saved in the local-repo.tar.gz file, which will be used during the configuration of the RPM repository.
+~~~
+ls -l local-repo.tar.gz 
+-rw-r--r-- 1 presight presight 219333732 Feb 19 18:09 local-repo.tar.gz
+~~~
 
-**Bootstrap the cluster**
+### Install Ceph cluster
 
-When all prerequisits compleated we can run site.yml playbook which will complete installation for us. 
+When all prerequisits compleated we can run main.yml playbook which will complete full Ceph cluster installation for us. 
 ~~~
 ansible-playbook main.yml
 ~~~
 
-When cluster is install link for the Dashboard url will be provided, with default credentials. During first login you will be forced to update password for admin user.
+When cluster is install link for the Dashboard url will be provided, with default credentials. During first login we will be forced to update password for admin user.
 
 ![alt text](png/image-5.png)
 
 
-**Step by step explanation**
+###Step by step explanation
 
 While the main.yml allows for the installation of the entire cluster, we will now go step-by-step to provide more details about the installation flow. 
 
@@ -131,7 +150,7 @@ While the main.yml allows for the installation of the entire cluster, we will no
 This playbook configures local RPM repositories for all servers. Based on the variables defined in group vars, either a local repository on the admin node or public repositories will be configured. For local repo installation 00_download_rpm_packages.sh have to be compleated before. 
 ![alt text](png/image-3.png)
 
-It is also advisable to manually configure the local default repositories from the Linux base image, which can be mounted, and a repository can be configured for that mount. For more information, [refer here](https://upspir.com/setting-up-a-local-yum-repository/).
+It is also advisable to configure the local default repositories from the Linux base image, which can be mounted, and a repository can be configured for that mount. The repository created by Ansible can be used for reference. For more information, [refer here](https://upspir.com/setting-up-a-local-yum-repository/).
 
 **02_hosts_predeploy_config.yml**
 
@@ -139,11 +158,11 @@ Once the RPM repository is configured, we can check and install all required pac
 
 **03_deploy_docker_registry.yml**
 
-In this steps local private registry will be installed. All *.tar images from ./docker_archives/ directory will be pushed into this docker registry. [00_download_docker_images.sh](ansible/00_download_docker_images.sh) has to be done before. If local registry deployment disabled in group_vars, this step will be skipped. 
+In this steps local private docker registry will be installed. All *.tar images from ./docker_archives/ directory will be pushed into this docker registry. 00_download_docker_images.sh has to be compleated before, to download and save all required RPMs. If internet access allowed, and local registry deployment disabled in group_vars, this step will be skipped. 
 
 **04_bootstrap_cluster.yml**
 
-In this step, the initial cluster will be bootstrapped on the admin nodes. Whether a local Docker registry is used to bootstrap the cluster will depend on the definitions in group_vars.
+In this step, the initial cluster will be bootstrapped on the admin node. 
 
 **05_add_hosts.yml**
 
@@ -155,13 +174,14 @@ In a Ceph cluster with multiple ceph-mgr instances, only the dashboard running o
 
 
 ### Useful Commands
-When Ceph cluster with core components is deployed, cluster can be configured and other nodes added according architecture planing for the site. New nodes can be added with specific label then service/deamonds configured to be placed on that hosts according labels. Below provided most useful commmands, for more information please refer to official [documentation](https://docs.ceph.com/en/squid/cephadm/host-management/).
+Once the Ceph cluster with core components is deployed, the cluster can be configured, and other nodes can be added according to the architectural plan for the site. With the first two playbooks, hosts can be preconfigured, and then they can be manually joined into the cluster by specifying service labels. Services/daemons are then configured to be placed on those hosts according to their labels. 
+Below provided some useful commmands, for more information please refer to official [documentation](https://docs.ceph.com/en/squid/cephadm/host-management/).
 
-Add Host Labels:
+Add Labels to Hosts:
 ~~~
 ceph orch host label add HOSTNAME LABEL
 ~~~
-List Hosts and Labels:
+List Hosts and their labels:
 ~~~
 ceph orch host ls
 ~~~
