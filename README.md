@@ -6,7 +6,7 @@ This repository provides a streamlined approach to deploying a Ceph cluster usin
 
 Ceph Storage Cluster Architecture Overview:
 
-![alt text](image.png)
+![alt text](PNG/image.png)
 
 ## Quick Start
 
@@ -104,11 +104,11 @@ Make sure that CEPH_VERSION variable defined in shell scripts match with ceph_ve
 
 Download docker images:
 
-![alt text](image-2.png)
+![alt text](PNG/image-2.png)
 
 Download RPMs:
 
-![alt text](image-4.png)
+![alt text](PNG/image-4.png)
 
 **Bootstrap the cluster**
 
@@ -119,7 +119,7 @@ ansible-playbook main.yml
 
 When cluster is install link for the Dashboard url will be provided, with default credentials. During first login you will be forced to update password for admin user.
 
-![alt text](image-5.png)
+![alt text](PNG/image.png)
 
 
 **Step by step explanation**
@@ -129,7 +129,7 @@ While the main.yml allows for the installation of the entire cluster, we will no
 [01_configure_rpm_repo.yml](ansible/01_configure_rpm_repo.yml) 
 
 This playbook configures local RPM repositories for all servers. Based on the variables defined in group vars, either a local repository on the admin node or public repositories will be configured. For local repo installation 00_download_rpm_packages.sh have to be compleated before. 
-![alt text](image-3.png)
+![alt text](PNG/image-3.png)
 
 It is also advisable to manually configure the local default repositories from the Linux base image, which can be mounted, and a repository can be configured for that mount. For more information, [refer here](https://upspir.com/setting-up-a-local-yum-repository/).
 
