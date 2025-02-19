@@ -1,45 +1,57 @@
----
-- name: Gather hostnames from Ceph hosts
-  hosts: ceph
-  gather_facts: yes
-  tasks:
-    - debug:
-        msg: "Gathered hostname: {{ ansible_hostname }}"
+# ---  
+# - name: Gather hostnames from Ceph hosts  
+#   hosts: ceph  
+#   gather_facts: yes  
+#   tasks:  
+#     - debug:  
+#         msg: "Gathered hostname: {{ ansible_hostname }}"  
         
-- name: Add all Ceph hosts to the cluster
-  hosts: admin
-  tasks:
-
-    - name: Install the cluster's public SSH key on Ceph hosts
-      shell: ssh-copy-id -f -i /etc/ceph/ceph.pub root@{{ item }}
-      with_items: "{{ groups['ceph'] }}"
-      ignore_errors: yes
+- name: Add all Ceph hosts to the cluster  
+  hosts: ceph  
+  tasks:  
+  
+    - name: Install the cluster's public SSH key on Ceph hosts  
+      shell: ssh-copy-id -f -i /etc/ceph/ceph.pub root@{{ item }}  
+      with_items: "{{ groups['ceph'] }}"  
+      ignore_errors: yes  
       register: ssh_key_installation
-
-    - name: Display SSH key installation results
-      debug:
-        msg: "SSH key installed for: {{ item.item }}"
-        verbosity: 1
-      with_items: "{{ ssh_key_installation.results }}"
+      delegate_to: "{{ groups['admin'][0] }}"
+      run_once: true
+  
+    - name: Display SSH key installation results  
+      debug:  
+        msg: "SSH key installed for: {{ item.item }}"  
+        verbosity: 1  
+      with_items: "{{ ssh_key_installation.results }}"  
       when: item.rc == 0
-
-    - name: Add each Ceph host to the cluster
-      shell: ceph orch host add {{ hostvars[item]['ansible_hostname'] }} {{ hostvars[item]['ansible_host'] | default(item) }} --labels _admin
-      with_items: "{{ groups['ceph'] }}"
-      register: host_addition
+      delegate_to: "{{ groups['admin'][0] }}"
+      run_once: true
+  
+    - name: Add each Ceph host to the cluster  
+      shell: ceph orch host add {{ hostvars[item]['ansible_hostname'] }} {{ hostvars[item]['ansible_host'] | default(item) }} --labels _admin  
+      with_items: "{{ groups['ceph'] }}"  
+      register: host_addition  
       ignore_errors: yes
-
-    - name: Display host addition results
-      debug:
-        msg: "Host added: {{ item.item }} with result: {{ item.stdout }}"
-      with_items: "{{ host_addition.results }}"
+      delegate_to: "{{ groups['admin'][0] }}"
+      run_once: true
+  
+    - name: Display host addition results  
+      debug:  
+        msg: "Host added: {{ item.item }} with result: {{ item.stdout }}"  
+      with_items: "{{ host_addition.results }}"  
       when: item.rc == 0
-
-    # day two actions
-    - name: Add storage, consume all available devices
-      command: ceph orch apply osd --all-available-devices
+      delegate_to: "{{ groups['admin'][0] }}"
+      run_once: true
+  
+    # day two actions  
+    - name: Add storage, consume all available devices  
+      command: ceph orch apply osd --all-available-devices  
       when: create_default_storage_on_all_devices
-
-    - name: Create a CephFS volume named "cephfs" (MDS deamons are created)
-      command: ceph fs volume create cephfs
+      delegate_to: "{{ groups['admin'][0] }}"
+      run_once: true 
+  
+    - name: Create a CephFS volume named "cephfs" (MDS deamons are created)  
+      command: ceph fs volume create cephfs  
       when: create_default_mds
+      delegate_to: "{{ groups['admin'][0] }}"
+      run_once: true

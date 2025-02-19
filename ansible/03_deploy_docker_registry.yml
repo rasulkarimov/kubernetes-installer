@@ -1,0 +1,6 @@
+---
+- name: Setup Docker Registry on Admin Host
+  hosts: docker_registry
+  become: yes
+  roles:
+    - deploy_docker_registry

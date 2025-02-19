@@ -1,0 +1,36 @@
+#
+# Ansible managed
+#
+defaults
+  log global
+  option log-health-checks
+  timeout connect 5s
+  timeout client 50s
+  timeout server 450s
+
+listen stats
+    bind :8080
+    mode http
+    # stats auth admin:admin
+    stats enable
+    stats uri /
+    monitor-uri /healthz
+
+#frontend dashboard_front
+#  mode http
+#  bind *:80
+#  option httplog
+#  redirect scheme https code 301 if !{ ssl_fc }
+
+frontend dashboard_front_ssl
+  mode tcp
+  bind *:443
+  default_backend dashboard_back_ssl
+
+backend dashboard_back_ssl
+  balance roundrobin
+  option httpchk GET /
+  http-check expect status 200-399
+  {% for host in groups['ceph'] %}
+  server ceph-node{{ loop.index }} {{ host }}:8443 check check-ssl verify none
+  {% endfor %}

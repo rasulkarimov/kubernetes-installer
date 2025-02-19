@@ -32,3 +32,4 @@ for IMAGE in "${IMAGES[@]}"; do
     echo "Archived ${IMAGE} to ${ARCHIVE_DIR}/${IMAGE_NAME_TAG}.tar"
 done
 
+## TODO make compateble with docker 

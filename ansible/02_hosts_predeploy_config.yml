@@ -1,0 +1,6 @@
+---
+- name: Validate system requirements
+  hosts: all
+  become: true
+  roles:
+    - hosts_predeploy_config

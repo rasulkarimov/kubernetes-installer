@@ -1,0 +1,8 @@
+---
+- name: Configure HAProxy for SSL/TLS passthrough on loadbalancer node
+  hosts: loadbalncer
+  become: yes
+  roles:
+    - deploy_haproxy
+
+

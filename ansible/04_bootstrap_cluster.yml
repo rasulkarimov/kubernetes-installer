@@ -35,14 +35,6 @@
           - "Bootstrap Command Output: {{ bootstrap_result.stdout }}"
           - "Monitor IP Used: {{ ansible_host }}"
 
-    - name: Verify ceph command version
-      command: ceph -v
-      register: ceph_version_result
-
-    - name: Display ceph command version
-      debug:
-        msg: "Ceph version: {{ ceph_version_result.stdout }}"
-
     - name: Verify Ceph status
       command: ceph -s
       register: ceph_status_result

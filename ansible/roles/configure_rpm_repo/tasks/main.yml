@@ -1,0 +1,90 @@
+---
+- name: Check for the presence of local-repo.tar.gz
+  stat:
+    path: "{{ playbook_dir }}/local-repo.tar.gz"
+  register: tarball_status
+
+- name: Copy local-repo.tar.gz to admin host
+  copy:
+    src: "{{ playbook_dir }}/local-repo.tar.gz"
+    dest: /tmp/local-repo.tar.gz
+  when: tarball_status.stat.exists
+
+- name: Create /var/local-repo directory
+  file:
+    path: /var/local-repo
+    state: directory
+
+- name: Unpack local-repo.tar.gz to /var/local-repo
+  unarchive:
+    src: /tmp/local-repo.tar.gz
+    dest: /var/local-repo
+    remote_src: yes
+  when: tarball_status.stat.exists
+
+- name: Create local yum repository configuration
+  copy:
+    content: |
+      [Local-Repo]
+      name=Local Ceph Dependencies Repository
+      baseurl=file:///var/local-repo
+      enabled=1
+      gpgcheck=0
+    dest: "{{ repo_file_path }}"
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Install httpd
+  yum:
+    name:
+      - httpd
+    state: present
+
+- name: Configure httpd to serve the repository
+  block:
+    - name: Create symlink so that httpd can access the repository
+      file:
+        src: "{{ local_repo_path }}"
+        dest: /var/www/html/local-repo
+        state: link
+
+    - name: Start and enable httpd service
+      systemd:
+        name: httpd
+        state: started
+        enabled: yes
+
+- name: Open HTTP port in firewall
+  firewalld:
+    service: http
+    permanent: true
+    state: enabled
+  notify: Reload firewalld
+  ignore_errors: true
+
+- name: Configure YUM repo and manage cache on all servers
+  copy:
+    content: |
+      [Local-Repo]
+      name=Local Repository
+      baseurl=http://{{ groups['admin'][0] }}/local-repo/
+      enabled=1
+      gpgcheck=0
+    dest: "{{ repo_file_path }}"
+    owner: root
+    group: root
+    mode: '0644'
+  delegate_to: "{{ item }}"
+  with_items: "{{ groups['all'] }}"
+
+- name: Clean YUM cache after configuring YUM repo
+  command: yum clean all
+  delegate_to: "{{ item }}"
+  with_items: "{{ groups['all'] }}"
+
+- name: Make YUM cache after configurong YUM repo
+  command: yum makecache
+  delegate_to: "{{ item }}"
+  with_items: "{{ groups['all'] }}"
+
