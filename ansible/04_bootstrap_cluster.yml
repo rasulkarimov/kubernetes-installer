@@ -21,10 +21,9 @@
           --initial-dashboard-user  admin
           --initial-dashboard-password admin007
           --mon-ip {{ ansible_host }}
-          {% cluster_network %}
+          {% if cluster_network %}
           --cluster-network {{ cluster_network }}
           {% endif %}
-
       args:
         chdir: "{{ playbook_dir }}"
       register: bootstrap_result

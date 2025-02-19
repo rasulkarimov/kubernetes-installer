@@ -78,7 +78,7 @@
         content: |
           [Local-Repo]
           name=Local Repository
-          baseurl=http://{{ groups['docker_registry'][0] }}/local-repo/
+          baseurl=http://{{ groups['admin'][0] }}/local-repo/
           enabled=1
           gpgcheck=0
         dest: "{{ repo_file_path }}"

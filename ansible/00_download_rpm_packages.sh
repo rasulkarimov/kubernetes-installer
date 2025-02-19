@@ -1,9 +1,10 @@
 #!/bin/bash
 
 CEPH_VERSION="19.2.0"
+DISTRO="el9"
 
 #Configure ceph repo
-curl --silent --remote-name --location https://download.ceph.com/rpm-$CEPH_VERSION/el9/noarch/cephadm
+curl --silent --remote-name --location https://download.ceph.com/rpm-$CEPH_VERSION/$DISTRO/noarch/cephadm
 chmod +x cephadm
 ./cephadm add-repo --version $CEPH_VERSION
 
@@ -45,7 +46,7 @@ mkdir -p $DOWNLOAD_DIR
 # Download specified packages with dependencies
 for package in "${PACKAGES[@]}"; do
     echo "Downloading $package..."
-    yumdownloader --resolve --destdir=$DOWNLOAD_DIR $package
+    yumdownloader --resolve --alldeps --destdir=$DOWNLOAD_DIR $package
 done
 
 # Create YUM metadata for the repository

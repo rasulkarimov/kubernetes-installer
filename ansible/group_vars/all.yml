@@ -3,9 +3,8 @@ docker_registry_enabled: true
 loadbalancer_enabled: true
 packages_repositiry_enabled: true
 ntp_server_source: time.google.com # when NTP server source provided, it will be configured during validate-install step
-ceph_image: ceph:v19.2.0
-# define for internal cluster traffic
-cluster_network: 10.1.0.0/16
+ceph_version: 19.2.0
+cluster_network: 10.1.0.0/16 # define for internal cluster traffic
 
 # day two configureation
 create_default_storage_on_all_devices: false
