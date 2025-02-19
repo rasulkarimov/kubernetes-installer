@@ -105,6 +105,7 @@ Download docker images:
 ![alt text](image-2.png)
 
 Download RPMs:
+
 ![alt text](image-4.png)
 
 **Bootstrap the cluster**
