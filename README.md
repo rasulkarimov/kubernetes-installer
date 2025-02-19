@@ -141,7 +141,7 @@ Once the RPM repository is configured, we can check and install all required pac
 
 In this steps local private registry will be installed. All *.tar images from ./docker_archives/ directory will be pushed into this docker registry. [00_download_docker_images.sh](ansible/00_download_docker_images.sh) has to be done before. If local registry deployment disabled in group_vars, this step will be skipped. 
 
-*04_bootstrap_cluster.yml*
+**04_bootstrap_cluster.yml**
 
 In this step, the initial cluster will be bootstrapped on the admin nodes. Whether a local Docker registry is used to bootstrap the cluster will depend on the definitions in group_vars.
 
