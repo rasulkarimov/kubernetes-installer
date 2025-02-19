@@ -73,7 +73,8 @@ become_ask_pass = False
 10.1.215.183
 10.1.132.204
 ~~~
-On the admin host, the Ceph cluster will be bootstrapped, and an RPM repository source will be created, allowing all hosts to refer to it for package installations within the network without requiring internet access. Additionally, a local registry will be installed, and all required Docker images will be pushed to this registry. Details about this process will be covered later.
+On the admin host, the Ceph cluster will be bootstrapped, and an RPM repository source will be created, allowing all hosts to refer to it for package installations within the network without requiring internet access. 
+Additionally, a local registry will be installed, and all required Docker images will be pushed to this registry. Details about this process will be covered later.
 
 For the load balancer group, HAProxy will be installed to expose the Ceph Dashboard from the host where the MGR service is active.
 
