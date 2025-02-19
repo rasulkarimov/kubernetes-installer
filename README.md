@@ -103,6 +103,7 @@ For an internet-disconnected installation, you we to prepare the appropriate Doc
 Make sure that CEPH_VERSION variable defined in shell scripts match with ceph_version defined in group_vars/site.sh file.
 
 Download docker images:
+
 ![alt text](image-2.png)
 
 Download RPMs:
