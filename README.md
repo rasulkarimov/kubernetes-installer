@@ -4,7 +4,7 @@
 
 This repository provides a streamlined approach to deploying a Ceph cluster using Ansible. It supports on-premises servers and, in the "Quick Start" section, provides an example which was tested with CentOS 9 operating system (Rocky Linux 9). 
 
-Ceph Storage Cluster Architecture Overview:
+Basic Ceph Storage Cluster Architecture Overview:
 
 ![alt text](png/image.png)
 
