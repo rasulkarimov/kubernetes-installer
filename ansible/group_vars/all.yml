@@ -1,4 +1,4 @@
-# day one
+# day one installation
 docker_registry_enabled: true
 loadbalancer_enabled: true
 packages_repositiry_enabled: true
@@ -9,4 +9,3 @@ cluster_network: 10.1.0.0/16 # define for internal cluster traffic
 # day two configureation
 create_default_storage_on_all_devices: false
 create_default_mds: false
-create_default_rgw: false

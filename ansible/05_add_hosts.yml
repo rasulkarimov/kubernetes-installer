@@ -43,7 +43,3 @@
     - name: Create a CephFS volume named "cephfs" (MDS deamons are created)
       command: ceph fs volume create cephfs
       when: create_default_mds
-
-    - name: Deploy RGWs
-      command: ceph orch apply rgw test
-      when: create_default_rgw

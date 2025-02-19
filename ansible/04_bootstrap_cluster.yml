@@ -12,7 +12,7 @@
       command: >-
           cephadm
           {% if docker_registry_enabled %}
-          --image {{ groups['docker_registry'][0] }}:5000/ceph:v19.2.0
+          --image {{ groups['docker_registry'][0] }}:5000/ceph:v{{ ceph_version }}
           {% endif %} 
           bootstrap
           {% if docker_registry_enabled %}

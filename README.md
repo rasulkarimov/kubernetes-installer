@@ -12,6 +12,11 @@ Architecture example:
 
 ### Installing a Ceph Cluster in a Private Datacenter
 
+**Prerequsits**
+* Installed git 
+* Installed ansible
+Other instruments will be deployed with ansible.
+
 For installing a Ceph cluster without internet access, you need to configure a private repository. Follow these steps:
 
 1. **Configure Private Repository**:  
