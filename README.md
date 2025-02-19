@@ -172,7 +172,7 @@ In a Ceph cluster with multiple ceph-mgr instances, only the dashboard running o
 
 
 ### Useful Commands
-Once the Ceph cluster with core components is deployed, the cluster can be configured, and other nodes can be added according to the architectural plan for the site. With the first two playbooks, hosts can be preconfigured, and then they can be manually joined into the cluster by specifying service labels. Services/daemons are then configured to be placed on those hosts according to their labels. 
+Once the Ceph cluster with core components is deployed, the cluster can be configured according requirements, and other nodes can be added according to the architectural plan for the site. With the first two playbooks, additional hosts can be preconfigured, and then they can be manually joined into the cluster by specifying service labels. Services/daemons are then configured to be placed on those hosts according to their labels. 
 Below provided some useful commmands, for more information please refer to official [documentation](https://docs.ceph.com/en/squid/cephadm/host-management/).
 
 Add Labels to Hosts:
