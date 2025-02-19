@@ -11,11 +11,11 @@
     - name: Bootstrap Ceph cluster
       command: >-
           cephadm
-          {% if docker_registry_enabled %}
+          {% if deploy_private_docker_registry %}
           --image {{ groups['docker_registry'][0] }}:5000/ceph:v{{ ceph_version }}
           {% endif %} 
           bootstrap
-          {% if docker_registry_enabled %}
+          {% if deploy_private_docker_registry %}
           --config initial-ceph.conf
           {% endif %}
           --initial-dashboard-user  admin

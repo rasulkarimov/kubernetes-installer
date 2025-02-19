@@ -1,14 +1,10 @@
-loadbalncer:
-  hosts:
-    10.1.195.23:
-docker_registry:
-  hosts:
-    10.1.195.23:
-admin:
-  hosts:
-    10.1.195.23:
-ceph:
-  hosts:
-    10.1.195.23:
-    10.1.215.183:
-    10.1.132.204:
+[loadbalncer]
+10.1.195.23
+[docker_registry]
+10.1.195.23
+[admin]
+10.1.195.23
+[ceph]
+10.1.195.23
+10.1.215.183
+10.1.132.204

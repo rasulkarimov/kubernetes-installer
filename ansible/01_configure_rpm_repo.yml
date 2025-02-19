@@ -23,7 +23,6 @@
       file:
         path: /var/local-repo
         state: directory
-      when: tarball_status.stat.exists
 
     - name: Unpack local-repo.tar.gz to /var/local-repo
       unarchive:
@@ -97,8 +96,4 @@
       command: yum makecache
       delegate_to: "{{ item }}"
       with_items: "{{ groups['all'] }}"
-
-  handlers:
-  - name: Reload firewalld
-    command: firewall-cmd --reload
 

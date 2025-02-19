@@ -1,5 +1,5 @@
-# day one installation
-docker_registry_enabled: true
+# day one
+deploy_private_docker_registry: true
 loadbalancer_enabled: true
 packages_repositiry_enabled: true
 ntp_server_source: time.google.com # when NTP server source provided, it will be configured during validate-install step
