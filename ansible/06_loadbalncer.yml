@@ -37,3 +37,5 @@
       service:
         name: haproxy
         state: restarted
+
+# TODO configure self-signed certeficate, which later easily can be changed by real cert
