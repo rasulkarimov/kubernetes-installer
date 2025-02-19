@@ -1,3 +1,0 @@
-- import_playbook: load_balancer.yml
-- import_playbook: masters.yml
-- import_playbook: workers.yml

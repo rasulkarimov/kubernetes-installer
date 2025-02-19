@@ -1,0 +1,6 @@
+- import_playbook: 01_configure_rpm_repo.yml
+- import_playbook: 02_hosts_predeploy_config.yml
+- import_playbook: 03_deploy_docker_registry.yml
+- import_playbook: 04_bootstrap_cluster.yml
+- import_playbook: 05_add_hosts.yml
+- import_playbook: 06_deploy_haproxy.yml
