@@ -108,8 +108,9 @@ When cluster is install link for the Dashboard url will be provided, with defaul
 
 
 **Step by step explanation**
-While the main.yml playbook allows for the installation of the entire cluster, we will now go step-by-step to provide more details about the installation flow. 
-The 01_configure_rpm_repo.yml playbook configures local RPM repositories for all servers. Based on the variables defined in group vars, either a local repository on the admin node or public repositories will be configured.
+While the main.yml allows for the installation of the entire cluster, we will now go step-by-step to provide more details about the installation flow. 
+The 01_configure_rpm_repo.yml playbook configures local RPM repositories for all servers. Based on the variables defined in group vars, either a local repository on the admin node or public repositories will be configured. For local repo installation 00_download_rpm_packages.sh have to be compleated before.
+![alt text](image-3.png)
 
 Install Private Registry
 Steps to configure the private registry and bootstrap the first Ceph cluster:
