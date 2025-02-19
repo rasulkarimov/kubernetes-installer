@@ -122,6 +122,7 @@ When cluster is install link for the Dashboard url will be provided, with defaul
 While the main.yml allows for the installation of the entire cluster, we will now go step-by-step to provide more details about the installation flow. 
 
 [01_configure_rpm_repo.yml](ansible/01_configure_rpm_repo.yml) 
+
 This playbook configures local RPM repositories for all servers. Based on the variables defined in group vars, either a local repository on the admin node or public repositories will be configured. For local repo installation 00_download_rpm_packages.sh have to be compleated before. 
 ![alt text](image-3.png)
 
