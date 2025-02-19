@@ -15,12 +15,9 @@ Basic Ceph Storage Cluster Architecture Overview:
 * ansible
 * podman
 
-Other tools will be deployed with ansible.
+Additional tools will be deployed using Ansible.
 
-For installing a Ceph cluster without internet access, you need to configure a private repository. Follow these steps:
-
-
-**Configure Ansible User with Sudo Access**
+**Configure User**
 
 To remotely manage nodes, the Ansible user must be able to log into all nodes with root privileges to install software and create configuration files without prompting for a password.
 ~~~
@@ -35,14 +32,13 @@ ssh-keygen
 ssh-copy-id <all hosts>
 ~~~
 
-**Clone the Repository**:
-   - Use Git to clone the required repository.
+Use Git to clone this repository:
 
    ```bash
    git clone https://github.com/rasulkarimov/ceph-installer.git
    ```
 
-**Review Ansible Configuration (ansible.cfg)**:
+**Review Ansible Configuration in ansible.cfg**:
 
 Ensure that the Ansible configuration is set up with the appropriate credentials. Define the remote user and their credentials, ensuring that the user is able to connect to all hosts and perform sudo operations without requiring a password.
 ~~~
@@ -57,7 +53,7 @@ become_user = root
 become_ask_pass = False
 ~~~
 
-**Fill inventory file with your hosts**
+**Fill inventory file with hosts**
 ~~~
 [admin]
 10.1.195.23
@@ -75,7 +71,7 @@ Additionally, a local registry will be installed, and all required Docker images
 
 For the load balancer group, HAProxy will be installed to expose the Ceph Dashboard from the host where the MGR service is active.
 
-**Review group variables in [group_vars/all.yml](ansible/group_vars/all.yml)**
+**Review group variables in group_vars/all.yml**
 
 ~~~
 # day one 
@@ -90,7 +86,7 @@ cluster_network: 10.1.0.0/16 # define for internal cluster traffic
 create_default_storage_on_all_devices: false
 create_default_mds: false
 ~~~
-Installation behavior can be customized through group_var variables. For example, if the site has access to the public internet, there is no need to install a private Docker registry. This step can be disabled in the variables file, meaning the registry will not be installed, and the cluster will download images from official public repositories on the internet during bootstrapping.
+Installation behavior can be customized through group_var variables. For example, if site has access to the public internet, there is no need to install a private Docker registry. This step can be disabled in the variables file, meaning the registry will not be installed, and the cluster will download images from official public repositories on the internet during bootstrapping.
 
 Setting deploy_private_rpm_repository: false will configure hosts to download Ceph packages from public Ceph repositories.
 
