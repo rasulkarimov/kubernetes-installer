@@ -7,7 +7,7 @@
 
 - name: Configure HAProxy with SSL/TLS passthrough
   template:
-    src: haproxy_ssl.j2
+    src: haproxy.cfg.j2
     dest: /etc/haproxy/haproxy.cfg
     mode: '0644'
   notify:
