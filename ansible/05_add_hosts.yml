@@ -34,3 +34,16 @@
         msg: "Host added: {{ item.item }} with result: {{ item.stdout }}"
       with_items: "{{ host_addition.results }}"
       when: item.rc == 0
+
+    # day two actions
+    - name: Add storage, consume all available devices
+      command: ceph orch apply osd --all-available-devices
+      when: create_default_storage_on_all_devices
+
+    - name: Create a CephFS volume named "cephfs" (MDS deamons are created)
+      command: ceph fs volume create cephfs
+      when: create_default_mds
+
+    - name: Deploy RGWs
+      command: ceph orch apply rgw test
+      when: create_default_rgw

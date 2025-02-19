@@ -1,6 +1,7 @@
 ---
 - name: Validate system requirements
   hosts: all
+  become: true
   tasks:
 
     - name: Check for Python 3
@@ -84,5 +85,28 @@
         state: present
         update_cache: yes
       when: podman_docker_check.rc != 0
+
+    - name: Install Cephadm
+      package:
+        name: cephadm
+        state: present
+        update_cache: yes
+
+    - name: Install Cephadm
+      package:
+        name: cephadm
+        state: present
+        update_cache: yes
+
+    - name: Confirm cephadm installation
+      command: which cephadm
+      register: cephadm_path
+
+    - name: Display cephadm path
+      debug:
+        msg: "Cephadm is installed at: {{ cephadm_path.stdout }}"
+
+    - name: Install ceph-common package
+      shell: cephadm install ceph-common
 
 # TODO enable and configure firewalld

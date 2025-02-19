@@ -1,7 +1,7 @@
 ---
 - name: Configure HAProxy for SSL/TLS passthrough on loadbalancer node
   hosts: loadbalncer
-  #become: yes
+  become: yes
   tasks:
 
     - name: Install HAProxy

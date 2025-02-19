@@ -1,0 +1,98 @@
+---
+- name: Setup Local Repository and HTTP Server
+  hosts: admin
+  become: true
+  vars:
+    local_repo_path: "/var/local-repo"
+    repo_file_path: "/etc/yum.repos.d/local-repo.repo"
+
+  tasks:
+
+    - name: Check for the presence of local-repo.tar.gz
+      stat:
+        path: local-repo.tar.gz
+      register: tarball_status
+
+    - name: Copy local-repo.tar.gz to admin host
+      copy:
+        src: local-repo.tar.gz
+        dest: /tmp/local-repo.tar.gz
+      when: tarball_status.stat.exists
+
+    - name: Ensure local repository directory exists
+      file:
+        path: "{{ local_repo_path }}"
+        state: directory
+
+    - name: Create local yum repository configuration
+      copy:
+        content: |
+          [Local-Repo]
+          name=Local Ceph Dependencies Repository
+          baseurl=file:///var/local-repo
+          enabled=1
+          gpgcheck=0
+        dest: "{{ repo_file_path }}"
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Install required packages
+      yum:
+        name:
+          - httpd
+        state: present
+
+    - name: Configure httpd to serve the repository
+      block:
+        - name: Create symlink so that httpd can access the repository
+          file:
+            src: "{{ local_repo_path }}"
+            dest: /var/www/html/local-repo
+            state: link
+
+        - name: Start and enable httpd service
+          systemd:
+            name: httpd
+            state: started
+            enabled: yes
+
+    - name: Open HTTP port in firewall
+      firewalld:
+        service: http
+        permanent: true
+        state: enabled
+      notify: Reload firewalld
+
+    - name: Configure YUM repo and manage cache on all servers
+      copy:
+        content: |
+          [Local-Repo]
+          name=Local Repository
+          baseurl=http://{{ groups['docker_registry'][0] }}/local-repo/
+          enabled=1
+          gpgcheck=0
+        dest: "{{ repo_file_path }}"
+        owner: root
+        group: root
+        mode: '0644'
+      delegate_to: "{{ item }}"
+      with_items: "{{ groups['all'] }}"
+
+    - name: Clean YUM cache after configuring YUM repo
+      command: yum clean all
+      delegate_to: "{{ item }}"
+      with_items: "{{ groups['all'] }}"
+
+    - name: Make YUM cache after configurong YUM repo
+      command: yum makecache
+      delegate_to: "{{ item }}"
+      with_items: "{{ groups['all'] }}"
+
+  handlers:
+    - name: Reload firewalld
+      block:
+        - name: Execute firewall reload
+          command: firewall-cmd --reload
+      ignore_errors: yes
+

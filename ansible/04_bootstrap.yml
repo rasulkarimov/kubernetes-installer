@@ -21,6 +21,9 @@
           --initial-dashboard-user  admin
           --initial-dashboard-password admin007
           --mon-ip {{ ansible_host }}
+          {% cluster_network %}
+          --cluster-network {{ cluster_network }}
+          {% endif %}
 
       args:
         chdir: "{{ playbook_dir }}"
@@ -48,19 +51,3 @@
     - name: Display Ceph status
       debug:
         msg: "Ceph status: {{ ceph_status_result.stdout }}"
-
-    - name: Change Standby Behaviour when loadbalancer enabled
-      command: ceph config set mgr mgr/dashboard/standby_behaviour "error"
-      when: loadbalancer_enabled
-
-    - name: Add storage, consume all available devices
-      command: ceph orch apply osd --all-available-devices
-      when: create_default_storage_on_all_devices
-
-    - name: Create a CephFS volume named "cephfs" (MDS deamons are created)
-      command: ceph fs volume create cephfs
-      when: create_default_mds
-
-    - name: Deploy RGWs
-      command: ceph orch apply rgw test
-      when: create_default_rgw

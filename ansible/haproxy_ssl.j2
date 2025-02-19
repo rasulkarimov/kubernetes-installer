@@ -13,11 +13,11 @@ listen stats
     stats uri /
     monitor-uri /healthz
 
-frontend dashboard_front
-  mode http
-  bind *:80
-  option httplog
-  redirect scheme https code 301 if !{ ssl_fc }
+#frontend dashboard_front
+#  mode http
+#  bind *:80
+#  option httplog
+#  redirect scheme https code 301 if !{ ssl_fc }
 
 frontend dashboard_front_ssl
   mode tcp

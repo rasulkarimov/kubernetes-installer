@@ -1,9 +1,0 @@
----
-- name: Install cephadm on admin group
-  hosts: localhost
-  tasks:
-    - name: Ensure cephadm is executable
-      file:
-        path: ./cephadm
-        mode: '0755'
-        state: file
