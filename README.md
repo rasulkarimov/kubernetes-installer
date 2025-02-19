@@ -126,30 +126,30 @@ When cluster is install link for the Dashboard url will be provided, with defaul
 
 While the main.yml allows for the installation of the entire cluster, we will now go step-by-step to provide more details about the installation flow. 
 
-[01_configure_rpm_repo.yml](ansible/01_configure_rpm_repo.yml) 
+01_configure_rpm_repo.yml 
 
 This playbook configures local RPM repositories for all servers. Based on the variables defined in group vars, either a local repository on the admin node or public repositories will be configured. For local repo installation 00_download_rpm_packages.sh have to be compleated before. 
 ![alt text](png/image-3.png)
 
 It is also advisable to manually configure the local default repositories from the Linux base image, which can be mounted, and a repository can be configured for that mount. For more information, [refer here](https://upspir.com/setting-up-a-local-yum-repository/).
 
-[02_validate_and_install_requirements.yml](ansible/02_validate_and_install_requirements.yml)
+02_hosts_predeploy_config.yml
 
 Once the RPM repository is configured, we can check and install all required packages and complete configuration prerequisites on all hosts. The Chrony server will be configured in this step according to variables provided in group_vars.
 
-[Install Private Registry](ansible/03_configure_docker_registry.yml)
+03_deploy_docker_registry.yml
 
 In this steps local private registry will be installed. All *.tar images from ./docker_archives/ directory will be pushed into this docker registry. [00_download_docker_images.sh](ansible/00_download_docker_images.sh) has to be done before. If local registry deployment disabled in group_vars, this step will be skipped. 
 
-[04_bootstrap_cluster.yml](ansible/04_bootstrap_cluster.yml)
+04_bootstrap_cluster.yml
 
 In this step, the initial cluster will be bootstrapped on the admin nodes. Whether a local Docker registry is used to bootstrap the cluster will depend on the definitions in group_vars.
 
-[05_add_hosts.yml](ansible/05_add_hosts.yml)
+05_add_hosts.yml
 
 All remaining hosts will be added into cluster. cephadmin orchestrator automatically will scale deamonds depending number of nodes. cephadm will automatically add up to five monitors to the subnet, as needed, as new hosts are added to the cluster.
 
-[06_haproxy.yml](ansible/06_haproxy.yml)
+06_deploy_haproxy.yml
 
 In a Ceph cluster with multiple ceph-mgr instances, only the dashboard running on the currently active ceph-mgr daemon will serve incoming requests. This step will install a proxy that automatically forwards incoming requests to the active ceph-mgr instance.
 
