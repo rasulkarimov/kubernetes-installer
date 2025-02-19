@@ -25,6 +25,16 @@ For installing a Ceph cluster without internet access, you need to configure a p
 ### Configure Ansible User with Sudo Access
 
 To remotely manage nodes, the Ansible user must be able to log into all nodes with root privileges to install software and create configuration files without prompting for a password.
+~~~
+USER_NAME=presight
+USER_PASSWD=<passwd>
+adduser $USER_NAME
+cat << EOF >/etc/sudoers.d/$USER_NAME
+$USER_NAME ALL = (root) NOPASSWD:ALL
+EOF
+echo "$USER_NAME:$USER_PASSWD" | sudo chpasswd
+ssh-copy-id <all hosts>
+~~~
 
 **Clone the Repository**:
    - Use Git to clone the required repository.
