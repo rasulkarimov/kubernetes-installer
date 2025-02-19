@@ -79,6 +79,7 @@ Additionally, a local registry will be installed, and all required Docker images
 For the load balancer group, HAProxy will be installed to expose the Ceph Dashboard from the host where the MGR service is active.
 
 **Review group variables in group_vars/site.yml**
+
 In variables can be customized installation process. For example if site has access to public internet then tot needed to install private docker registry, this step can be disabled in variables file, then registry will not be installed and cluster during bootstraping will download images from official public repositoryes from internet.
 "deploy_private_rpm_repository: false" - will configure hosts to download ceph packages from public ceph repos.
 ~~~
