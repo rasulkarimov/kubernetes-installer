@@ -119,7 +119,7 @@ ansible-playbook main.yml
 
 When cluster is install link for the Dashboard url will be provided, with default credentials. During first login you will be forced to update password for admin user.
 
-![alt text](PNG/image.png)
+![alt text](PNG/image-5.png)
 
 
 **Step by step explanation**
