@@ -13,21 +13,29 @@ PACKAGES=(
     "podman"
     "openssh"
     "git"
+    "cephadm"
     "ceph"
-    "ceph-common"
     "httpd"
     "yum-utils"
     "ansible"
     "chrony"
+    "ceph-common"
+    "ansible" 
 )
 
 # Directory to store downloaded RPM packages
 DOWNLOAD_DIR="local-repo"
 
-# Ensure yum-utils are installed
+# Ensure yum-utilsand are installed
 if ! rpm -qa | grep -qw yum-utils; then
     echo "Installing yum-utils..."
-    sudo yum install -y yum-utils
+    sudo yum install -y yum-utils createrepo
+fi
+
+# Ensure createrepo installed
+if ! rpm -qa | grep -qw createrepo; then
+    echo "Installing createrepo..."
+    sudo yum install -y createrepo
 fi
 
 # Create download directory

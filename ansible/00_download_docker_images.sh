@@ -11,7 +11,6 @@ mkdir -p "${ARCHIVE_DIR}"
 # List of images to download
 IMAGES=(
     "quay.io/ceph/ceph:v$CEPH_VERSION"
-    "quay.io/podman/hello:latest"
     "quay.io/prometheus/prometheus:v2.51.0"
     "quay.io/ceph/grafana:10.4.0"
     "quay.io/prometheus/node-exporter:v1.7.0"

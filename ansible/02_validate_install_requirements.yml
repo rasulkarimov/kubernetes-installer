@@ -92,12 +92,6 @@
         state: present
         update_cache: yes
 
-    - name: Install Cephadm
-      package:
-        name: cephadm
-        state: present
-        update_cache: yes
-
     - name: Confirm cephadm installation
       command: which cephadm
       register: cephadm_path

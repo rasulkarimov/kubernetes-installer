@@ -10,19 +10,27 @@
 
     - name: Check for the presence of local-repo.tar.gz
       stat:
-        path: local-repo.tar.gz
+        path: "{{ playbook_dir }}/local-repo.tar.gz"
       register: tarball_status
 
     - name: Copy local-repo.tar.gz to admin host
       copy:
-        src: local-repo.tar.gz
+        src: "{{ playbook_dir }}/local-repo.tar.gz"
         dest: /tmp/local-repo.tar.gz
       when: tarball_status.stat.exists
 
-    - name: Ensure local repository directory exists
+    - name: Create /var/local-repo directory
       file:
-        path: "{{ local_repo_path }}"
+        path: /var/local-repo
         state: directory
+      when: tarball_status.stat.exists
+
+    - name: Unpack local-repo.tar.gz to /var/local-repo
+      unarchive:
+        src: /tmp/local-repo.tar.gz
+        dest: /var/local-repo
+        remote_src: yes
+      when: tarball_status.stat.exists
 
     - name: Create local yum repository configuration
       copy:
@@ -37,7 +45,7 @@
         group: root
         mode: '0644'
 
-    - name: Install required packages
+    - name: Install httpd
       yum:
         name:
           - httpd
@@ -63,6 +71,7 @@
         permanent: true
         state: enabled
       notify: Reload firewalld
+      ignore_errors: true
 
     - name: Configure YUM repo and manage cache on all servers
       copy:
@@ -90,9 +99,6 @@
       with_items: "{{ groups['all'] }}"
 
   handlers:
-    - name: Reload firewalld
-      block:
-        - name: Execute firewall reload
-          command: firewall-cmd --reload
-      ignore_errors: yes
+  - name: Reload firewalld
+    command: firewall-cmd --reload
 
