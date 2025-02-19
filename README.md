@@ -33,6 +33,7 @@ cat << EOF >/etc/sudoers.d/$USER_NAME
 $USER_NAME ALL = (root) NOPASSWD:ALL
 EOF
 echo "$USER_NAME:$USER_PASSWD" | sudo chpasswd
+ssh-keygen
 ssh-copy-id <all hosts>
 ~~~
 
