@@ -1,0 +1,41 @@
+---
+- name: Get playbook directory for initial-ceph.conf file 
+  set_fact:
+    playbook_dir_rescue: "{{ inventory_dir | default(lookup('env', 'PWD')) }}"
+  tags: always
+
+- name: Bootstrap Ceph cluster
+  command: >-
+      cephadm
+      {% if deploy_private_docker_registry %}
+      --image {{ groups['docker_registry'][0] }}:5000/ceph:v{{ ceph_version }}
+      {% endif %} 
+      bootstrap
+      {% if deploy_private_docker_registry %}
+      --config initial-ceph.conf
+      {% endif %}
+      --initial-dashboard-user  admin
+      --initial-dashboard-password admin007
+      --mon-ip {{ ansible_host }}
+      {% if cluster_network %}
+      --cluster-network {{ cluster_network }}
+      {% endif %}
+  args:
+    chdir: "{{ playbook_dir }}"
+  register: bootstrap_result
+  ignore_errors: yes
+
+- name: Display bootstrap results
+  debug:
+    msg: 
+      - "Bootstrap Command Output: {{ bootstrap_result.stdout }}"
+      - "Monitor IP Used: {{ ansible_host }}"
+
+- name: Verify Ceph status
+  command: ceph -s
+  register: ceph_status_result
+
+- name: Display Ceph status
+  debug:
+    msg: "Ceph status: {{ ceph_status_result.stdout }}"
+
