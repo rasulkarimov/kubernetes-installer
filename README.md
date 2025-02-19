@@ -78,7 +78,7 @@ Additionally, a local registry will be installed, and all required Docker images
 
 For the load balancer group, HAProxy will be installed to expose the Ceph Dashboard from the host where the MGR service is active.
 
-**Review group variables in group_vars/site.yml**
+**Review group variables in [group_vars/all.yml](ansible/group_vars/all.yml)**
 
 ~~~
 # day one 
