@@ -117,7 +117,9 @@ When all prerequisits compleated we can run site.yml playbook which will complet
 ansible-playbook main.yml
 ~~~
 
-When cluster is install link for the Dashboard url will be provided, with default credentials. During first login you will be forced to update password for admin user. 
+When cluster is install link for the Dashboard url will be provided, with default credentials. During first login you will be forced to update password for admin user.
+
+![alt text](image-1.png)
 
 
 **Step by step explanation**
