@@ -141,7 +141,7 @@ When cluster is install link for the Dashboard url will be provided, with defaul
 
 ### Step by step explanation
 
-While the main.yml allows for the installation of the entire cluster, we will now go step-by-step to provide more details about the installation flow. 
+While the installation of the entire cluster is facilitated by main.yml, detailed information about the installation flow is provided here
 
 **01_configure_rpm_repo.yml**
 
