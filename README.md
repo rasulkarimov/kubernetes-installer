@@ -99,6 +99,7 @@ Download docker images:
 ~~~
 ./00_download_docker_images.sh 
 Trying to pull quay.io/ceph/ceph:v19.2.0...
+...
 ~~~
 
 When the script is completed, ensure that the Docker images are saved in the ./docker_archives/ directory:
@@ -117,6 +118,7 @@ total 2096664
 Download RPMs:
 ~~~
 ./00_download_rpm_packages.sh
+...
 ~~~
 
 All packages with their dependencies have been downloaded and saved in the local-repo.tar.gz file, which will be used during the configuration of the RPM repository.
@@ -125,7 +127,7 @@ ls -l local-repo.tar.gz
 -rw-r--r-- 1 presight presight 219333732 Feb 19 18:09 local-repo.tar.gz
 ~~~
 
-### Install Ceph cluster
+## Install Ceph cluster
 
 When all prerequisits compleated we can run main.yml playbook which will complete full Ceph cluster installation for us. 
 ~~~
@@ -137,7 +139,7 @@ When cluster is install link for the Dashboard url will be provided, with defaul
 ![alt text](png/image-5.png)
 
 
-###Step by step explanation
+### Step by step explanation
 
 While the main.yml allows for the installation of the entire cluster, we will now go step-by-step to provide more details about the installation flow. 
 
