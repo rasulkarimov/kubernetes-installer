@@ -98,24 +98,20 @@ Installation behavior can be customized through group_var variables. For example
 Setting deploy_private_rpm_repository: false will configure hosts to download Ceph packages from public Ceph repositories.
 
 **Prepare required packages for internet disconnected installation**
+
 For an internet-disconnected installation, you we to prepare the appropriate Docker images and RPM files. In the Git repository with Ansible playbooks, two shell scripts are provided to download the required packages for installation from the internet. Run these scripts from a machine with internet access. Then, place them in the same location during the Ansible installation; if provided in the same location where they were downloaded by the script, Ansible will add them to the local RPM repository and Docker registries.
 Make sure that CEPH_VERSION variable defined in shell scripts match with ceph_version defined in group_vars/site.sh file.
 Download docker images:
-~~~
-./00_download_docker_images.sh
-~~~
 ![alt text](image-2.png)
 
 Download RPMs:
-~~~
-./00_download_rpm_packages.sh
-~~~
 ![alt text](image-4.png)
 
 **Bootstrap the cluster**
+
 When all prerequisits compleated we can run site.yml playbook which will complete installation for us. 
 ~~~
-ansible-playbook site.yml
+ansible-playbook main.yml
 ~~~
 
 When cluster is install link for the Dashboard url will be provided, with default credentials. During first login you will be forced to update password for admin user. 
