@@ -6,7 +6,7 @@ DISTRO="el9"
 #Configure ceph repo
 curl --silent --remote-name --location https://download.ceph.com/rpm-$CEPH_VERSION/$DISTRO/noarch/cephadm
 chmod +x cephadm
-./cephadm add-repo --version $CEPH_VERSION
+sudo ./cephadm add-repo --version $CEPH_VERSION
 
 # Packages list you want to download
 PACKAGES=(
