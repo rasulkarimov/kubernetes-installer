@@ -35,7 +35,7 @@ ssh-copy-id <all hosts>
 Use Git to clone this repository:
 
    ```bash
-   git clone https://github.com/rasulkarimov/ceph-installer.git
+   git clone https://github.com/repo/ceph-installer.git
    ```
 
 **Review Ansible Configuration in ansible.cfg**:
