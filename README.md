@@ -6,7 +6,7 @@ This repository provides a streamlined approach to deploying a Ceph cluster usin
 
 Basic Ceph Storage Cluster Architecture Overview:
 
-![alt text](png/image-7.png)
+![alt text](png/image-6.png)
 
 ## Quick Start
 
