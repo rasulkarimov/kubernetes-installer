@@ -80,8 +80,6 @@ For the load balancer group, HAProxy will be installed to expose the Ceph Dashbo
 
 **Review group variables in group_vars/site.yml**
 
-In variables can be customized installation process. For example if site has access to public internet then tot needed to install private docker registry, this step can be disabled in variables file, then registry will not be installed and cluster during bootstraping will download images from official public repositoryes from internet.
-"deploy_private_rpm_repository: false" - will configure hosts to download ceph packages from public ceph repos.
 ~~~
 # day one 
 deploy_private_docker_registry: true
@@ -95,6 +93,9 @@ cluster_network: 10.1.0.0/16 # define for internal cluster traffic
 create_default_storage_on_all_devices: false
 create_default_mds: false
 ~~~
+Installation behavior can be customized through group_var variables. For example, if the site has access to the public internet, there is no need to install a private Docker registry. This step can be disabled in the variables file, meaning the registry will not be installed, and the cluster will download images from official public repositories on the internet during bootstrapping.
+
+Setting deploy_private_rpm_repository: false will configure hosts to download Ceph packages from public Ceph repositories.
 
 **Prepare required packages for internet disconnected installation**
 For an internet-disconnected installation, you we to prepare the appropriate Docker images and RPM files. In the Git repository with Ansible playbooks, two shell scripts are provided to download the required packages for installation from the internet. Run these scripts from a machine with internet access. Then, place them in the same location during the Ansible installation; if provided in the same location where they were downloaded by the script, Ansible will add them to the local RPM repository and Docker registries.
